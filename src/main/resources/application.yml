@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: pre
+  profiles:
+    active: '@activeProfile@'
+  session:
+    store-type: redis
+  jmx:
+    enabled: false
+  freemarker:
+    check-template-location: false
+    cache: false
+    charset: UTF-8
+    template-loader-path: classpath:/templates/
+    content-type: text/html
+    suffix: .ftl
+    expose-request-attributes: true
+    expose-session-attributes: true
+    request-context-attribute: request
+    settings:
+      number_format: 0.##
+      template_exception_handler: ignore
+      classic_compatible: true
+      date_format: yyyy-MM-dd
+      datetime_format: yyyy-MM-dd HH:mm:ss
+  cache:
+    redis:
+      key-prefix: pre
+
+server:
+  servlet:
+    context-path: /pre
+  port: 8080
+
+mybatis:
+  mapper-locations: classpath:sql_mapper/*.xml
+  type-aliases-package: com.bazzi.pre.model
+  configuration:
+    call-setters-on-nulls: true
+
+#通用mapper配置
+mapper:
+  mappers: com.bazzi.core.generic.BaseMapper
+  not-empty: false
+  identity: MYSQL
+
+#PageHelper分页插件配置
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
+  page-size-zero: true
+
+#logback日志
+logging:
+  config: classpath:logback-spring.xml
+  path: /data/logs/
+  charset: UTF-8

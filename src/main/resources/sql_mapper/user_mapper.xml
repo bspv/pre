@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bazzi.pre.mapper.UserMapper">
+	<resultMap id="user" type="com.bazzi.pre.model.User">
+		<id column="id" jdbcType="BIGINT" property="id" />
+		<result column="user_name" jdbcType="VARCHAR" property="userName" />
+		<result column="password" jdbcType="VARCHAR" property="password" />
+		<result column="mobile" jdbcType="VARCHAR" property="mobile" />
+		<result column="avatar_url" jdbcType="VARCHAR" property="avatarUrl" />
+		<result column="sex" jdbcType="INTEGER" property="sex" />
+		<result column="platform" jdbcType="INTEGER" property="platform" />
+		<result column="imei" jdbcType="VARCHAR" property="imei" />
+		<result column="reg_time" jdbcType="TIMESTAMP" property="regTime" />
+		<result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, user_name, password, mobile, avatar_url, sex, platform, imei,
+		reg_time, last_login_time
+	</sql>
+	<select id="selectByLikeKey" parameterType="string"	resultMap="user">
+		<bind name="pattern" value="'%'+keyword+'%'"/>
+		select
+		<include refid="Base_Column_List" />
+		from user
+		where user_name like #{pattern}
+	</select>
+</mapper>
