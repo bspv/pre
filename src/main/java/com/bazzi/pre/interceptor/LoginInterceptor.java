@@ -1,9 +1,10 @@
 package com.bazzi.pre.interceptor;
 
 import com.bazzi.core.annotation.AllowAccess;
+import com.bazzi.core.util.JsonUtil;
 import com.bazzi.pre.model.User;
+import com.bazzi.pre.util.ThreadLocalHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.NamedThreadLocal;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -12,25 +13,32 @@ import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
 public class LoginInterceptor extends HandlerInterceptorAdapter {
-	private NamedThreadLocal<Long> timeThreadLocal = new NamedThreadLocal<>("StopWatch-StartTime");
 
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-		if (handler instanceof HandlerMethod) {
-			boolean allowAccess = ((HandlerMethod) handler).hasMethodAnnotation(AllowAccess.class);
-			User user = (User) request.getSession().getAttribute("user");
-			if (!allowAccess && user == null) {
-				try {
-					request.getRequestDispatcher("/user/toLogin").forward(request, response);
-				} catch (Exception e) {
-					log.error(e.getMessage(), e);
-				}
-				return false;
-			}
-		}
-		return true;
-	}
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        ThreadLocalHelper.setTime(System.currentTimeMillis());
+        if (handler instanceof HandlerMethod) {
+            boolean allowAccess = ((HandlerMethod) handler).hasMethodAnnotation(AllowAccess.class);
+            User user = (User) request.getSession().getAttribute("user");
+            if (!allowAccess && user == null) {
+                try {
+                    request.getRequestDispatcher("/user/toLogin").forward(request, response);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+                return false;
+            }
+        }
+        return true;
+    }
 
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-		log.debug("{} time:{}", request.getRequestURI(), System.currentTimeMillis() - timeThreadLocal.get());
-	}
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        log.info("Completed--->URI:{}, Method:{}, Parameter:{}, SessionAttribute:{}, Result:{}, Time:{}ms",
+                request.getRequestURI(),
+                request.getMethod(),
+                JsonUtil.toJsonString(ThreadLocalHelper.getParameter()),
+                JsonUtil.toJsonString(ThreadLocalHelper.getSessionAttr()),
+                JsonUtil.toJsonString(ThreadLocalHelper.getResult()),
+                System.currentTimeMillis() - ThreadLocalHelper.getTime());
+        ThreadLocalHelper.clearThreadLocal();
+    }
 }
