@@ -16,7 +16,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -366,17 +365,7 @@ public final class HttpUtil {
         Map<String, String> map = new HashMap<>();
         if (t == null)
             return map;
-        Field[] fields = t.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            String fieldName = field.getName();
-            // 排除serialVersionUID
-            if (!"serialVersionUID".equals(fieldName)) {
-                Object val = BeanUtil.getValueByField(field, t);
-                String value = val != null ? String.valueOf(val) : null;
-                map.put(fieldName, value);
-            }
-        }
-        return map;
+        return JsonUtil.parseMap(JsonUtil.toJsonString(t), String.class, String.class);
     }
 
 }
