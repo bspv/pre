@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -105,6 +107,26 @@ public final class JsonUtil {
     }
 
     /**
+     * 将Json格式字符串转为MultiValueMap
+     *
+     * @param context  Json格式字符串
+     * @param keyClazz key类型
+     * @param valClazz value类型
+     * @param <K>      key类型
+     * @param <V>      value类型
+     * @return MultiValueMap对象
+     */
+    public static <K, V> MultiValueMap<K, V> parseMultiValueMap(String context, Class<K> keyClazz, Class<V> valClazz) {
+        MultiValueMap<K, V> map = new LinkedMultiValueMap<>();
+        if (context == null || "".equals(context) || keyClazz == null || valClazz == null)
+            return map;
+        Map<K, V> kvMap = parseMap(context, keyClazz, valClazz);
+        if (kvMap != null)
+            map.setAll(kvMap);
+        return map;
+    }
+
+    /**
      * 将json转换成Result<T>对象
      *
      * @param context json字符串
@@ -123,5 +145,5 @@ public final class JsonUtil {
             return null;
         }
     }
-    
+
 }
