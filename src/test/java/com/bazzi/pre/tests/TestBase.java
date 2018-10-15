@@ -79,15 +79,16 @@ public class TestBase {
 	 * @param obj 待验证参数
 	 * @return true代表是json字符串，反之返回false
 	 */
-	private static boolean isJSON(Object obj) {
-		try {
-			if (obj == null)
-				return false;
-			new ObjectMapper().readTree(String.valueOf(obj));
-			return true;
-		} catch (IOException e) {
-			return false;
-		}
-	}
+    private static boolean isJSON(Object obj) {
+        try {
+            if (obj == null)
+                return false;
+            String val = String.valueOf(obj);
+            new ObjectMapper().readTree(val);
+            return val != null && val.contains("{") && val.contains("}");
+        } catch (IOException e) {
+            return false;
+        }
+    }
 
 }
