@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
     <springProperty name="logPath" source="logging.path" defaultValue="/data/logs"/>
-    <springProperty name="logName" source="spring.application.name" defaultValue="defaultLogFile"/>
+    <springProperty name="logName" source="spring.application.name" defaultValue="pre"/>
     <springProperty name="logLevel" source="logging.level.root" defaultValue="INFO"/>
     <springProperty name="maxHistory" source="logging.file.max-history" defaultValue="30"/>
     <springProperty name="logCharset" source="logging.charset" defaultValue="UTF-8"/>
@@ -38,25 +38,21 @@
     </appender>
 
     <logger name="org.springframework" level="INFO" />
+    <logger name="org.springframework.web.servlet.DispatcherServlet" level="ERROR"/>
     <logger name="org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver" level="INFO" />
     <logger name="ch.qos.logback" level="INFO" />
     <logger name="org.mybatis.spring.mapper.MapperScannerConfigurer" level="INFO" />
     <logger name="org.mybatis.spring.SqlSessionFactoryBean" level="INFO" />
-    <logger name="org.apache.commons.httpclient.HttpClient" level="INFO" />
     <logger name="org.apache.commons.httpclient" level="INFO" />
-    <logger name="org.apache.commons.httpclient.HttpConnection" level="INFO" />
-    <logger name="org.apache.http.client.protocol" level="INFO" />
-    <logger name="org.apache.ibatis.logging.LogFactory" level="INFO" />
     <logger name="org.apache.commons.beanutils" level="INFO" />
     <logger name="org.apache.http.headers" level="INFO" />
+    <logger name="org.apache.http.client.protocol" level="INFO" />
+    <logger name="org.apache.ibatis.logging.LogFactory" level="INFO" />
     <logger name="java.sql.ResultSet" level="INFO" />
     <!-- Spring-data-redis日志 -->
-    <logger name="org.springframework.data.redis" level="INFO"/>
     <logger name="io.lettuce.core" level="INFO"/>
     <!-- Spring-session日志 -->
-    <logger name="org.springframework.session" level="INFO"/>
     <logger name="org.apache.catalina.core.ContainerBase" level="ERROR"/>
-    <logger name="org.springframework.web.servlet.DispatcherServlet" level="ERROR"/>
 
     <!-- 日志输出级别 -->
     <root level='property("logging.level.root")'>
