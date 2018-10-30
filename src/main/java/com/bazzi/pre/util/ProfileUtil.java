@@ -6,7 +6,7 @@ import org.springframework.core.io.Resource;
 
 import java.util.Properties;
 
-public class ProfileUtil {
+public final class ProfileUtil {
 	private static final String PROFILE_ACTIVE_KEY = "spring.profiles.active";
 	private static final String DEFAULT_PROFILE = "dev";
 	private static final String YML_BASE_FILE = "application.yml";
