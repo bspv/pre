@@ -42,6 +42,7 @@
     <logger name="org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver" level="INFO" />
     <logger name="ch.qos.logback" level="INFO" />
     <logger name="org.mybatis.spring.mapper.MapperScannerConfigurer" level="INFO" />
+    <logger name="org.mybatis.spring.mapper.ClassPathMapperScanner" level="ERROR" />
     <logger name="org.mybatis.spring.SqlSessionFactoryBean" level="INFO" />
     <logger name="org.apache.commons.httpclient" level="INFO" />
     <logger name="org.apache.commons.beanutils" level="INFO" />
