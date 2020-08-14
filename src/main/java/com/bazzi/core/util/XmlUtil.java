@@ -18,8 +18,8 @@ import java.io.Writer;
 public final class XmlUtil {
 	public static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n";
 
-	private static XStream cdataXStream;
-	private static XStream xStream;
+	private static final XStream cdataXStream;
+	private static final XStream xStream;
 
 	static {
 		xStream = buildXStream();
@@ -121,9 +121,8 @@ public final class XmlUtil {
 			public HierarchicalStreamWriter createWriter(Writer out) {
 				return new PrettyPrintWriter(out) {
 					// 对所有xml节点的转换都增加CDATA标记
-					boolean cdata = true;
+					final boolean cdata = true;
 
-					@SuppressWarnings("rawtypes")
 					public void startNode(String name, Class clazz) {
 						super.startNode(name, clazz);
 					}

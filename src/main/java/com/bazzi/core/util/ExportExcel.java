@@ -176,7 +176,7 @@ public final class ExportExcel {
 			Cell cell = row.createCell(i);
 			cell.setCellStyle(bodyStyle(wb));
 
-			Object val = BeanUtil.getValueByField(fieldList.get(i), t);
+			Object val = BeanUtil.getValue(fieldList.get(i), t);
 			convertValueToCell(val, cell);
 		}
 	}
