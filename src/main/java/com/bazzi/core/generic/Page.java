@@ -1,73 +1,45 @@
 package com.bazzi.core.generic;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.List;
 
-public class Page implements Serializable {
-	private static final long serialVersionUID = 6095275634490272398L;
-	private Integer current = 1;// 当前页码
+@Data
+public class Page<T> implements Serializable {
+	private static final long serialVersionUID = -5547536957621580709L;
+	private Integer pageIdx = 1;// 当前页码
 	private Integer pageSize = 10;// 每页大小
-	private List<?> records;// 数据
+	private List<T> records;// 数据
 	private Integer totalRow;// 总记录数
 	private Integer totalPage;// 总页数
-	private Integer rowIdx;// 从第几条记录开始
+	private boolean hasPrev;// 是否有上一页
+	private boolean hasNext;// 是否有下一页
 
-	public Integer getCurrent() {
-		return current;
+	public Page() {
 	}
 
-	public void setCurrent(Integer current) {
-		this.current = current;
-	}
-
-	public Integer getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
-	}
-
-	public List<?> getRecords() {
-		return records;
-	}
-
-	public void setRecords(List<?> records) {
+	public Page(List<T> records, Integer pageIdx, Integer pageSize, Integer totalRow) {
 		this.records = records;
-	}
-
-	public Integer getTotalRow() {
-		return totalRow;
-	}
-
-	public void setTotalRow(Integer totalRow) {
+		this.pageIdx = pageIdx;
+		this.pageSize = pageSize;
 		this.totalRow = totalRow;
 		this.totalPage = totalRow % pageSize == 0 ? totalRow / pageSize : totalRow / pageSize + 1;
+		this.hasPrev = pageIdx > 1;
+		this.hasNext = pageIdx < totalPage;
 	}
 
-	public Integer getTotalPage() {
-		return totalPage;
-	}
-
-	public void setTotalPage(Integer totalPage) {
-		this.totalPage = totalPage;
-	}
-
-	public Integer getRowIdx() {
-		rowIdx = pageSize * (current - 1);
-		return rowIdx;
-	}
-
-	public void setRowIdx(Integer rowIdx) {
-		this.rowIdx = rowIdx;
-	}
-
-	public boolean hasPrev() {
-		return current > 1;
-	}
-
-	public boolean hasNext() {
-		return current < totalPage;
+	public static <T> Page<T> of(List<T> records, Integer pageIdx, Integer pageSize, Integer totalRow) {
+		Page<T> page = new Page<>();
+		page.setPageIdx(pageIdx);
+		page.setPageSize(pageSize);
+		page.setRecords(records);
+		page.setTotalRow(totalRow);
+		int totalPage = totalRow % pageSize == 0 ? totalRow / pageSize : totalRow / pageSize + 1;
+		page.setTotalPage(totalPage);
+		page.setHasPrev(pageIdx > 1);
+		page.setHasNext(pageIdx < totalPage);
+		return page;
 	}
 
 }
