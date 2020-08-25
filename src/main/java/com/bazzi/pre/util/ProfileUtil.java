@@ -16,7 +16,7 @@ public final class ProfileUtil {
 	 *
 	 * @return profile的名称
 	 */
-	private static String getActiveProfile() {
+	public static String getActiveProfile() {
 		// 从设置参数里获取
 		String profile = System.getProperties().getProperty(PROFILE_ACTIVE_KEY);
 		if (profile == null || "".equals(profile)) {
