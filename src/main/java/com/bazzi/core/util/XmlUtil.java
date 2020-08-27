@@ -121,7 +121,7 @@ public final class XmlUtil {
 			public HierarchicalStreamWriter createWriter(Writer out) {
 				return new PrettyPrintWriter(out) {
 					// 对所有xml节点的转换都增加CDATA标记
-					final boolean cdata = true;
+					final static boolean cdata = true;
 
 					public void startNode(String name, Class clazz) {
 						super.startNode(name, clazz);

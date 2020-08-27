@@ -23,13 +23,8 @@ spring:
       classic_compatible: true
       date_format: yyyy-MM-dd
       datetime_format: yyyy-MM-dd HH:mm:ss
-  cache:
-    redis:
-      key-prefix: pre
 
 server:
-  servlet:
-    context-path: /pre
   port: 8080
 
 mybatis:
@@ -55,5 +50,6 @@ pagehelper:
 #logback日志
 logging:
   config: classpath:logback-spring.xml
-  path: /data/logs/
+  file:
+    path: /opt/logs/
   charset: UTF-8

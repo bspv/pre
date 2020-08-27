@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
-    <springProperty name="logPath" source="logging.path" defaultValue="/data/logs"/>
+    <springProperty name="logPath" source="logging.file.path" defaultValue="/data/logs"/>
     <springProperty name="logName" source="spring.application.name" defaultValue="pre"/>
     <springProperty name="logLevel" source="logging.level.root" defaultValue="INFO"/>
     <springProperty name="maxHistory" source="logging.file.max-history" defaultValue="30"/>
