@@ -27,11 +27,37 @@ spring:
 server:
   port: 8080
 
+info:
+  app:
+    name: "@project.name@"
+    profile: "@activeProfile@"
+    version: "@project.version@"
+    description: "@project.description@"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*' #也可以配置具体的配置，比如beans,info,health
+      base-path: / #路径
+  endpoint:
+    health:
+      show-details: always #显示详情
+    shutdown:
+      enabled: false #不使用接口关闭Spring Boot
+  server:
+    port: 8081 #actuator使用的端口号
+
+#mybatis配置
 mybatis:
   mapper-locations: classpath:sql_mapper/*.xml
   type-aliases-package: com.bazzi.pre.model
   configuration:
     call-setters-on-nulls: true
+    use-generated-keys: true
+    cache-enabled: true
+    default-executor-type: reuse
+#    log-impl: org.apache.ibatis.logging.log4j2.Log4j2Impl
 
 #通用mapper配置
 mapper:
