@@ -31,6 +31,7 @@
         <!-- 插件版本号 -->
         <version-maven-compile-plugin>3.8.1</version-maven-compile-plugin>
         <version-maven-resources-plugin>3.2.0</version-maven-resources-plugin>
+        <version-maven-source-plugin>3.2.0</version-maven-source-plugin>
     </properties>
 
     <dependencies>
@@ -78,11 +79,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-dbcp2</artifactId>
         </dependency>
 
         <dependency>
@@ -157,6 +153,23 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>${version-maven-resources-plugin}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${version-maven-source-plugin}</version>
+                <configuration>
+                    <outputDirectory>${user.home}${file.separator}jars</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
