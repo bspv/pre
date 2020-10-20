@@ -1,12 +1,11 @@
 package com.bazzi.core.util;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
-@Slf4j
 public final class DateUtil {
     public static final String YMD_FORMAT = "yyyy-MM-dd";
     public static final String FULL_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
@@ -36,13 +35,8 @@ public final class DateUtil {
     public static LocalDateTime getDate(String strDate, String format) {
         if (strDate == null || "".equals(strDate) || format == null || "".equals(format))
             return null;
-        try {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
-            return LocalDateTime.parse(strDate, dtf);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
+        return LocalDateTime.parse(strDate, dtf);
     }
 
     /**
@@ -83,6 +77,26 @@ public final class DateUtil {
             return null;
         }
         return LocalDateTime.of(ldt.toLocalDate(), LocalTime.MAX);
+    }
+
+    /**
+     * 将Date转为LocalDateTime
+     *
+     * @param date Date
+     * @return LocalDateTime
+     */
+    public static LocalDateTime convertToLocalDateTime(Date date) {
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    }
+
+    /**
+     * 将LocalDateTime转为Date
+     *
+     * @param ldt LocalDateTime
+     * @return Date
+     */
+    public static Date convertToDate(LocalDateTime ldt) {
+        return Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
     }
 
 }
