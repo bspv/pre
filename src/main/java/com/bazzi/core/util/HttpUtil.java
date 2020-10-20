@@ -1,11 +1,13 @@
 package com.bazzi.core.util;
 
 import com.bazzi.core.ex.BusinessException;
+import com.bazzi.core.generic.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
@@ -33,13 +35,19 @@ public final class HttpUtil {
     private static final int PUT = 2;
     private static final int DELETE = 3;
 
+    private static final RequestConfig DEFAULT_REQUEST_CONFIG = RequestConfig.custom()
+            .setConnectTimeout(15000)//连接超时时间，毫秒
+            .setConnectionRequestTimeout(5000)//从connect Manager(连接池)获取Connection 超时时间，毫秒
+            .setSocketTimeout(60000)//请求获取数据的超时时间(即响应时间)，毫秒
+            .build();
+
     /**
      * 发送GET请求
      *
      * @param url 请求地址
      * @return 请求结果
      */
-    public static String sendGet(String url) {
+    public static Result<String> sendGet(String url) {
         return baseSend(url, null, GET);
     }
 
@@ -50,7 +58,7 @@ public final class HttpUtil {
      * @param param 普通Bean对象
      * @return 请求结果
      */
-    public static <T> String sendGet(String url, T param) {
+    public static <T> Result<String> sendGet(String url, T param) {
         return baseSend(url, param, GET);
     }
 
@@ -62,7 +70,7 @@ public final class HttpUtil {
      * @param header 请求头参数
      * @return 请求结果
      */
-    public static <T> String sendGet(String url, T param, T header) {
+    public static <T> Result<String> sendGet(String url, T param, T header) {
         return baseSend(url, param, header, GET);
     }
 
@@ -73,7 +81,7 @@ public final class HttpUtil {
      * @param param 普通Bean对象
      * @return 请求结果
      */
-    public static <T> String sendPost(String url, T param) {
+    public static <T> Result<String> sendPost(String url, T param) {
         return baseSend(url, param, POST);
     }
 
@@ -85,7 +93,7 @@ public final class HttpUtil {
      * @param header 请求头参数
      * @return 请求结果
      */
-    public static <T> String sendPost(String url, T param, T header) {
+    public static <T> Result<String> sendPost(String url, T param, T header) {
         return baseSend(url, param, header, POST);
     }
 
@@ -96,7 +104,7 @@ public final class HttpUtil {
      * @param param 普通Bean对象
      * @return 请求结果
      */
-    public static <T> String sendPut(String url, T param) {
+    public static <T> Result<String> sendPut(String url, T param) {
         return baseSend(url, param, PUT);
     }
 
@@ -108,7 +116,7 @@ public final class HttpUtil {
      * @param header 请求头参数
      * @return 请求结果
      */
-    public static <T> String sendPut(String url, T param, T header) {
+    public static <T> Result<String> sendPut(String url, T param, T header) {
         return baseSend(url, param, header, PUT);
     }
 
@@ -120,7 +128,7 @@ public final class HttpUtil {
      * @param <T>   泛型类型
      * @return 请求结果
      */
-    public static <T> String sendDelete(String url, T param) {
+    public static <T> Result<String> sendDelete(String url, T param) {
         return baseSend(url, param, DELETE);
     }
 
@@ -133,7 +141,7 @@ public final class HttpUtil {
      * @param <T>    泛型类型
      * @return 请求结果
      */
-    public static <T> String sendDelete(String url, T param, T header) {
+    public static <T> Result<String> sendDelete(String url, T param, T header) {
         return baseSend(url, param, header, DELETE);
     }
 
@@ -144,7 +152,7 @@ public final class HttpUtil {
      * @param param 请求参数，会用Jackson转成JSON字符串
      * @return 请求结果
      */
-    public static <T> String sendJsonInBody(String url, T param) {
+    public static <T> Result<String> sendJsonInBody(String url, T param) {
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
         return sendPostInBody(url, JsonUtil.toJsonString(param), headerMap);
@@ -158,7 +166,7 @@ public final class HttpUtil {
      * @param header 请求头信息
      * @return 请求结果
      */
-    public static <T> String sendJsonInBody(String url, T param, T header) {
+    public static <T> Result<String> sendJsonInBody(String url, T param, T header) {
         String context = JsonUtil.toJsonString(header);
         Map<String, String> headerMap = JsonUtil.parseMap(context, String.class, String.class);
         headerMap.put(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
@@ -178,7 +186,7 @@ public final class HttpUtil {
      * @param headerMap 请求头参数
      * @return 请求结果
      */
-    public static String sendPostInBody(String url, String param, Map<String, String> headerMap) {
+    public static Result<String> sendPostInBody(String url, String param, Map<String, String> headerMap) {
         if (url == null || "".equals(url))
             throw new IllegalArgumentException("Property 'url' is required");
         if (param == null || "".equals(param))
@@ -187,6 +195,7 @@ public final class HttpUtil {
         CloseableHttpResponse response = null;
         try {
             HttpPost postReq = new HttpPost(url);
+            postReq.setConfig(DEFAULT_REQUEST_CONFIG);
             headerMap = headerMap == null ? new HashMap<>() : headerMap;
             for (Map.Entry<String, String> entry : headerMap.entrySet()) {
                 postReq.addHeader(entry.getKey(), entry.getValue());
@@ -194,13 +203,13 @@ public final class HttpUtil {
             postReq.setEntity(new ByteArrayEntity(param.getBytes(StandardCharsets.UTF_8)));
             response = httpClient.execute(postReq);
             int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode == HttpStatus.SC_OK) {
-                HttpEntity httpEntity = response.getEntity();
-                return httpEntity == null ? null : EntityUtils.toString(httpEntity, StandardCharsets.UTF_8);
-            } else {
-                log.info("通讯异常，错误码：HTTP CODE(" + statusCode + ")");
-                return null;
+            if (statusCode != HttpStatus.SC_OK) {
+                log.info("StatusCode:{},ReasonPhrase:{}", statusCode, response.getStatusLine().getReasonPhrase());
+                return Result.failure("-1", String.format("异常的响应状态: %s", statusCode));
             }
+            HttpEntity httpEntity = response.getEntity();
+            String data = httpEntity == null ? null : EntityUtils.toString(httpEntity, StandardCharsets.UTF_8);
+            return Result.success(data);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw new BusinessException("-1", e.getMessage());
@@ -227,7 +236,7 @@ public final class HttpUtil {
      * @param type  请求类型，0:GET,1:POST,2:PUT,3:DELETE
      * @return 请求结果
      */
-    private static <T> String baseSend(String url, T param, int type) {
+    private static <T> Result<String> baseSend(String url, T param, int type) {
         return baseSend(url, convertToMap(param), null, type);
     }
 
@@ -238,7 +247,7 @@ public final class HttpUtil {
      * @param type   请求类型，0:GET,1:POST,2:PUT,3:DELETE
      * @return 请求结果
      */
-    private static <T> String baseSend(String url, T param, T header, int type) {
+    private static <T> Result<String> baseSend(String url, T param, T header, int type) {
         String context = JsonUtil.toJsonString(header);
         Map<String, String> headerMap = JsonUtil.parseMap(context, String.class, String.class);
         return baseSend(url, convertToMap(param), headerMap, type);
@@ -253,11 +262,12 @@ public final class HttpUtil {
      * @param type      请求类型，0:GET,1:POST,2:PUT,3:DELETE
      * @return 请求结果
      */
-    private static String baseSend(String url, Map<String, String> paramMap, Map<String, String> headerMap, int type) {
+    private static Result<String> baseSend(String url, Map<String, String> paramMap, Map<String, String> headerMap, int type) {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse response = null;
         try {
             HttpRequestBase requestBase = buildHttpRequestBase(url, paramMap, type);
+            requestBase.setConfig(DEFAULT_REQUEST_CONFIG);
 
             addHeaderForRequest(requestBase, headerMap);
 
@@ -265,11 +275,12 @@ public final class HttpUtil {
 
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != HttpStatus.SC_OK) {
-                throw new BusinessException("-1",
-                        String.format("异常的响应状态: %s", statusCode));
+                log.info("StatusCode:{},ReasonPhrase:{}", statusCode, response.getStatusLine().getReasonPhrase());
+                return Result.failure("-1", String.format("异常的响应状态: %s", statusCode));
             }
             HttpEntity httpEntity = response.getEntity();
-            return httpEntity == null ? null : EntityUtils.toString(httpEntity, StandardCharsets.UTF_8);
+            String data = httpEntity == null ? null : EntityUtils.toString(httpEntity, StandardCharsets.UTF_8);
+            return Result.success(data);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw new BusinessException("-1", e.getMessage());
