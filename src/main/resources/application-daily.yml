@@ -50,4 +50,4 @@ logging:
   file:
     max-history: 7
   level:
-    root: debug
+    root: DEBUG

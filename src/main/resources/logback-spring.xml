@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
-    <springProperty name="logPath" source="logging.file.path" defaultValue="/data/logs"/>
-    <springProperty name="logName" source="spring.application.name" defaultValue="pre"/>
-    <springProperty name="logLevel" source="logging.level.root" defaultValue="INFO"/>
-    <springProperty name="maxHistory" source="logging.file.max-history" defaultValue="30"/>
-    <springProperty name="logCharset" source="logging.charset" defaultValue="UTF-8"/>
+    <springProperty name="LOG_PATH" source="logging.file.path" defaultValue="/data/logs"/>
+    <springProperty name="LOG_NAME" source="spring.application.name" defaultValue="pre"/>
+    <springProperty name="LOG_LEVEL" source="logging.level.root" defaultValue="INFO"/>
+    <springProperty name="MAX_HISTORY" source="logging.file.max-history" defaultValue="30"/>
+    
+    <property name="LOG_CHARSET" value="UTF-8"/>
 
     <!--格式化输出：%d表示日期，%highlight：按日志级别着不同颜色，%-5level：级别从左显示5个字符宽度，
                    %magenta：品红色，%thread表示线程名，%cyan青色，%msg：日志消息，%n是换行符  -->
@@ -22,18 +23,18 @@
 
     <!-- root logger -->
     <appender name="rootAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${logPath}/${logName}/${logName}.log</file>
+        <file>${LOG_PATH}/${LOG_NAME}/${LOG_NAME}.log</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>${logLevel}</level>
+            <level>${LOG_LEVEL}</level>
         </filter>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
             <immediateFlush>true</immediateFlush>
-            <charset>${logCharset}</charset>
+            <charset>${LOG_CHARSET}</charset>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${logPath}/${logName}/${logName}.log.%d{yyyy-MM-dd}</fileNamePattern>
-            <maxHistory>${maxHistory}</maxHistory>
+            <fileNamePattern>${LOG_PATH}/${LOG_NAME}/${LOG_NAME}.%d{yyyy-MM-dd-HH}.log.gz</fileNamePattern>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
         </rollingPolicy>
     </appender>
 

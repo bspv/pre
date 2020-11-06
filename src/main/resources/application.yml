@@ -78,4 +78,3 @@ logging:
   config: classpath:logback-spring.xml
   file:
     path: /opt/logs/
-  charset: UTF-8

@@ -50,4 +50,4 @@ logging:
   file:
     max-history: 30
   level:
-    root: info
+    root: INFO
