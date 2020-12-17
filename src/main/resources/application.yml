@@ -77,4 +77,4 @@ pagehelper:
 logging:
   config: classpath:logback-spring.xml
   file:
-    path: /opt/logs/
+    path: /data/logs/
