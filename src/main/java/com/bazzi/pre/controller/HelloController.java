@@ -15,10 +15,7 @@ import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -59,7 +56,7 @@ public class HelloController {
 		User user = userService.findUserById(1L);
 		redisService.set("age", age);
 		redisService.set("user", user);
-		System.out.println(redisService.get("user").toString());
+		log.info(redisService.get("user").toString());
 		//return "helloworld" + redisService.get("age");
 		return new Result<>(user);
 	}
@@ -76,7 +73,7 @@ public class HelloController {
 		redisService.set("users", list);
 		asyncService.sleepAndPrint(list.get(0));
 //		session.setAttribute("redis","spring-session");
-		System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+		log.info("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 		return new Result<>(objectMapper.writeValueAsString(list));
 	}
 
@@ -88,8 +85,9 @@ public class HelloController {
 		return result;
 	}
 
-	@GetMapping(value = "checkParam", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Result<String> checkParam(LoginBean loginBean) {
+	@AllowAccess
+	@PostMapping(value = "checkParam", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Result<String> checkParam(@RequestBody LoginBean loginBean) {
 		return new Result<>("Test is ok");
 	}
 

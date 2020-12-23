@@ -47,7 +47,8 @@ spring:
 
 #日志
 logging:
-  file:
-    max-history: 30
   level:
     root: INFO
+  logback:
+    rollingpolicy:
+      max-history: 30

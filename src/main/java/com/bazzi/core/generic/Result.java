@@ -6,9 +6,9 @@ import java.io.Serializable;
 
 @Data
 public class Result<T extends Serializable> implements Serializable {
-    private static final long serialVersionUID = -5114827930099526751L;
+    private static final long serialVersionUID = -6022986667686858081L;
     private T data;
-    private boolean success = true;
+    private boolean status = true;
     private String message = "";
     private String code = "";
 
@@ -23,7 +23,7 @@ public class Result<T extends Serializable> implements Serializable {
     public void setError(String code, String message) {
         this.code = code;
         this.message = message;
-        this.success = false;
+        this.status = false;
     }
 
     /**

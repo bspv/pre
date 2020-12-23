@@ -2,7 +2,7 @@ package com.bazzi.pre.tests.mapper;
 
 import com.bazzi.pre.mapper.UserMapper;
 import com.bazzi.pre.tests.TestBase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Resource;
 

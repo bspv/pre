@@ -3,7 +3,7 @@
     <springProperty name="LOG_PATH" source="logging.file.path" defaultValue="/data/logs"/>
     <springProperty name="LOG_NAME" source="spring.application.name" defaultValue="pre"/>
     <springProperty name="LOG_LEVEL" source="logging.level.root" defaultValue="INFO"/>
-    <springProperty name="MAX_HISTORY" source="logging.file.max-history" defaultValue="30"/>
+    <springProperty name="MAX_HISTORY" source="logging.logback.rollingpolicy.max-history" defaultValue="30"/>
     
     <property name="LOG_CHARSET" value="UTF-8"/>
 

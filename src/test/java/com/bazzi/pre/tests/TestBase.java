@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -19,14 +19,14 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 
 @Slf4j
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = PreApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class TestBase {
 
 	@Resource
 	protected TestRestTemplate testRestTemplate;
 
-	@Before// 设置testRestTemplate编码格式
+	@BeforeEach// 设置testRestTemplate编码格式
 	public void beforeController() {
 		testRestTemplate.getRestTemplate().setMessageConverters(
 				Collections.singletonList(new StringHttpMessageConverter(Charset.defaultCharset())));

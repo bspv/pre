@@ -1,7 +1,7 @@
 package com.bazzi.pre.tests.controller;
 
 import com.bazzi.pre.tests.TestBase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;

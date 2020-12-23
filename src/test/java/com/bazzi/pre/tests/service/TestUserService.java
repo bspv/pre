@@ -2,7 +2,7 @@ package com.bazzi.pre.tests.service;
 
 import com.bazzi.pre.service.UserService;
 import com.bazzi.pre.tests.TestBase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Resource;
 

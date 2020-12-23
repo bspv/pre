@@ -6,13 +6,13 @@ import com.bazzi.pre.model.User;
 import com.bazzi.pre.util.ThreadLocalHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
-public class LoginInterceptor extends HandlerInterceptorAdapter {
+public class LoginInterceptor implements HandlerInterceptor {
 
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         ThreadLocalHelper.setTime(System.currentTimeMillis());
@@ -32,13 +32,14 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
     }
 
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        Long startTime = ThreadLocalHelper.getTime();
         log.info("Completed--->URI:{}, Method:{}, Parameter:{}, SessionAttribute:{}, Result:{}, Time:{}ms",
                 request.getRequestURI(),
                 request.getMethod(),
                 JsonUtil.toJsonString(ThreadLocalHelper.getParameter()),
                 JsonUtil.toJsonString(ThreadLocalHelper.getSessionAttr()),
                 JsonUtil.toJsonString(ThreadLocalHelper.getResult()),
-                System.currentTimeMillis() - ThreadLocalHelper.getTime());
+                startTime == null ? -1 : System.currentTimeMillis() - startTime);
         ThreadLocalHelper.clearThreadLocal();
     }
 }
