@@ -16,7 +16,6 @@ public class Result<T extends Serializable> implements Serializable {
     }
 
     public Result(T data) {
-        super();
         this.data = data;
     }
 

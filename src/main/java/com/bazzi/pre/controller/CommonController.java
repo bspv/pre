@@ -118,9 +118,7 @@ public class CommonController implements ErrorController {
 	@ResponseBody
 	@RequestMapping(path = "/user/toLogin")
 	public Result<?> loginJson(HttpServletRequest request, HttpServletResponse response) {
-		Result<?> result = new Result<>();
-		result.setError("691", "请先登录！");
-		return result;
+		return Result.failure("691", "请先登录！");
 	}
 
 	@Override
