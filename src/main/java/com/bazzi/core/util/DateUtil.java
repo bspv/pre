@@ -127,7 +127,7 @@ public final class DateUtil {
     }
 
     /**
-     * 构建用于打印和解析日期时间对象的格式化程序
+     * 构建用于打印和解析日期时间对象的格式化程序 24小时制
      *
      * @param format 日期格式
      * @return DateTimeFormatter
@@ -140,12 +140,12 @@ public final class DateUtil {
             curFormat = format + SPACE_JOINER + TIME_PATTERN;
         else {
             String[] arr = format.split(SPACE_JOINER);
-            if (arr[0].contains("HH")) {//时分秒在前
+            if (arr[0].contains("H")) //时分秒在前
                 curFormat = TIME_PATTERN + SPACE_JOINER + arr[1];
-            } else {
+            else
                 curFormat = arr[0] + SPACE_JOINER + TIME_PATTERN;
-            }
         }
+
         return new DateTimeFormatterBuilder().appendPattern(curFormat)
                 .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)//缺省0，小时
                 .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)//缺省0，分钟
