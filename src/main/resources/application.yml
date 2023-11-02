@@ -58,6 +58,8 @@ mybatis:
     cache-enabled: true
     default-executor-type: reuse
 #    log-impl: org.apache.ibatis.logging.log4j2.Log4j2Impl
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 
 #通用mapper配置
 mapper:
