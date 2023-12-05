@@ -10,7 +10,9 @@ import java.util.List;
 @Builder
 public final class Page<T> implements Serializable {
     private static final long serialVersionUID = 5564838797824564651L;
+    @Builder.Default
     private Integer pageIdx = 1;// 当前页码
+    @Builder.Default
     private Integer pageSize = 10;// 每页大小
     private List<T> records;// 数据
     private Integer totalRow;// 总记录数

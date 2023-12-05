@@ -10,6 +10,7 @@ import java.io.Serializable;
 public final class Result<T extends Serializable> implements Serializable {
     private static final long serialVersionUID = 4119708214034627331L;
     private T data;
+    @Builder.Default
     private boolean status = true;
     private String message = "";
     private String code = "";
