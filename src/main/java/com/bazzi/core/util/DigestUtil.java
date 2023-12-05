@@ -6,8 +6,8 @@ import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
 
 @Slf4j
 public final class DigestUtil {
@@ -46,7 +46,7 @@ public final class DigestUtil {
 		if (file == null)
 			return null;
 		try {
-			return DigestUtils.md5Hex(new FileInputStream(file));
+			return DigestUtils.md5Hex(Files.newInputStream(file.toPath()));
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}

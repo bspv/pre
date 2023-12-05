@@ -1,7 +1,7 @@
 package com.bazzi.core.ex;
 
 public class ParameterException extends RuntimeException {
-	private static final long serialVersionUID = 3941618802260071830L;
+	private static final long serialVersionUID = 2729755768816475272L;
 	private String code;
 	private String message;
 

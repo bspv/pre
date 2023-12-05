@@ -41,13 +41,13 @@ public class HelloController {
 	@GetMapping(value = "lock", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Result<Boolean> lock() {
 		Boolean flag = redisService.lock("orderCRM", "orderCRM_web", 100000);
-		return new Result<>(flag);
+		return Result.success(flag);
 	}
 
 	@GetMapping(value = "unlock", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Result<Boolean> unlock() {
 		Boolean flag = redisService.releaseLock("orderCRM", "orderCRM_web");
-		return new Result<>(flag);
+		return Result.success(flag);
 	}
 
 	@AllowAccess
@@ -57,8 +57,7 @@ public class HelloController {
 		redisService.set("age", age);
 		redisService.set("user", user);
 		log.info(redisService.get("user").toString());
-		//return "helloworld" + redisService.get("age");
-		return new Result<>(user);
+		return Result.success(user);
 	}
 
 	@AllowAccess
@@ -74,21 +73,19 @@ public class HelloController {
 		asyncService.sleepAndPrint(list.get(0));
 //		session.setAttribute("redis","spring-session");
 		log.info("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-		return new Result<>(objectMapper.writeValueAsString(list));
+		return Result.success(objectMapper.writeValueAsString(list));
 	}
 
 //	@AllowAccess
 	@GetMapping(value = "p", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Result<PageInfo<User>> p() {
-		Result<PageInfo<User>> result = new Result<>();
-		result.setData(userService.findPage(2, 3));
-		return result;
+		return Result.success(userService.findPage(2, 3));
 	}
 
 	@AllowAccess
 	@PostMapping(value = "checkParam", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Result<String> checkParam(@RequestBody LoginBean loginBean) {
-		return new Result<>("Test is ok");
+		return Result.success("Test is ok");
 	}
 
 	@AllowAccess
@@ -96,7 +93,7 @@ public class HelloController {
 	public Result<String> checkP(@NotBlank String userName,
 								 @NotBlank @Length(min = 6, max = 64) String password,
 								 @Min(value = 13) Integer age, HttpServletRequest request, HttpServletResponse response, HttpSession session) {
-		return new Result<>("Test is checkP");
+		return Result.success("Test is checkP");
 	}
 
 }

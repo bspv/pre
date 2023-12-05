@@ -35,7 +35,7 @@ public final class XmlUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T fromXml(String xml, Class<?> clazz) {
-		if (xml == null || "".equals(xml) || clazz == null)
+		if (xml == null || xml.isEmpty() || clazz == null)
 			return null;
 		XStreamAlias annotation = clazz.getDeclaredAnnotation(XStreamAlias.class);
 		String rootName = annotation == null ? clazz.getSimpleName() : annotation.value();
@@ -71,7 +71,7 @@ public final class XmlUtil {
 		if (t == null)
 			return null;
 		xStream.processAnnotations(t.getClass());
-		return header == null || "".equals(header) ? xStream.toXML(t) : header + xStream.toXML(t);
+		return header == null || header.isEmpty() ? xStream.toXML(t) : header + xStream.toXML(t);
 	}
 
 	/**
@@ -95,7 +95,7 @@ public final class XmlUtil {
 		if (t == null)
 			return null;
 		cdataXStream.processAnnotations(t.getClass());
-		return header == null || "".equals(header) ? cdataXStream.toXML(t) : header + cdataXStream.toXML(t);
+		return header == null || header.isEmpty() ? cdataXStream.toXML(t) : header + cdataXStream.toXML(t);
 	}
 
 	/**

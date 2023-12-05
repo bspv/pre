@@ -15,7 +15,7 @@ public class AsyncServiceImpl implements AsyncService {
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			log.error(e.getMessage(),e);
 		}
 		log.debug("async-method-end----------------------------------------"+user);
 	}

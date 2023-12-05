@@ -64,7 +64,7 @@ public class CommonController implements ErrorController {
 	@ResponseBody
 	@RequestMapping(path = "/error")
 	public Result<?> errorJson(HttpServletRequest request, Exception ex, HttpServletResponse response) {
-		Result<?> result = new Result<>();
+		Result.ResultBuilder<?> resultBuilder = Result.builder();
 		int status = response.getStatus();
 		if (status == HttpStatus.OK.value()) {// 异常
 			Object obj = request.getAttribute(DispatcherServlet.EXCEPTION_ATTRIBUTE);
@@ -87,11 +87,12 @@ public class CommonController implements ErrorController {
 					message = message == null ? exception.getCause().getMessage() : message;
 				}
 			}
-			result.setError(code, message);
+			resultBuilder.code(code).message(message).status(false);
 		} else {// 403、404、500等错误
-			result.setError(String.valueOf(status), HttpStatus.valueOf(status).getReasonPhrase());
+			resultBuilder.code(String.valueOf(status))
+					.message(HttpStatus.valueOf(status).getReasonPhrase()).status(false);
 		}
-		return result;
+		return resultBuilder.build();
 	}
 
 	/**

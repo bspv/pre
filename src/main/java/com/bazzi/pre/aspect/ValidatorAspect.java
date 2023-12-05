@@ -78,7 +78,7 @@ public class ValidatorAspect {
         String msg = builder.toString();
 
         //如果有错误信息，返回提示
-        if (!"".equals(msg) && msg.startsWith(";")) {
+        if (msg.startsWith(";")) {
             msg = msg.substring(1);//去掉错误提示起始位置的 `;`
             log.debug(msg);
             throw new ParameterException("-1", msg);
@@ -94,7 +94,7 @@ public class ValidatorAspect {
     private void validateForBean(Object arg, StringBuilder builder) {
         if (arg != null) {
             Set<ConstraintViolation<Object>> validate = validator.validate(arg);
-            if (validate != null && validate.size() > 0) {
+            if (validate != null && !validate.isEmpty()) {
                 List<ConstraintViolation<Object>> list = new ArrayList<>(validate);
                 Field[] fields = list.get(0).getRootBeanClass().getDeclaredFields();//获取bean的属性
                 String[] errMsgArr = new String[fields.length];//属性对应的错误信息数组
@@ -111,13 +111,13 @@ public class ValidatorAspect {
                     Integer idx = beanMap.get(parameterName);
                     String val = errMsgArr[idx];
                     String message = modifyMsg(violation, parameterName);
-                    val = val == null || "".equals(val) ? message : val + ";" + message;
+                    val = val == null || val.isEmpty() ? message : val + ";" + message;
                     errMsgArr[idx] = val;
                 }
 
                 //拼接错误信息
                 for (String value : errMsgArr) {
-                    if (value != null && !"".equals(value))
+                    if (value != null && !value.isEmpty())
                         builder.append(";").append(value);
                 }
 

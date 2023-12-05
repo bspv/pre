@@ -54,7 +54,7 @@ public final class JsonUtil {
      * @return 返回对象
      */
     public static <T> T parseObject(String context, Class<T> clazz) {
-        if (context == null || "".equals(context) || clazz == null)
+        if (context == null || context.isEmpty() || clazz == null)
             return null;
         try {
             return objectMapper.readValue(context, clazz);
@@ -73,7 +73,7 @@ public final class JsonUtil {
      * @return list集合
      */
     public static <T> List<T> parseList(String context, Class<T> clazz) {
-        if (context == null || "".equals(context) || clazz == null)
+        if (context == null || context.isEmpty() || clazz == null)
             return null;
         try {
             JavaType javaType = objectMapper.getTypeFactory().constructParametricType(List.class, clazz);
@@ -95,7 +95,7 @@ public final class JsonUtil {
      * @return map对象
      */
     public static <K, V> Map<K, V> parseMap(String context, Class<K> keyClazz, Class<V> valClazz) {
-        if (context == null || "".equals(context) || keyClazz == null || valClazz == null)
+        if (context == null || context.isEmpty() || keyClazz == null || valClazz == null)
             return null;
         try {
             JavaType javaType = objectMapper.getTypeFactory().constructParametricType(Map.class, keyClazz, valClazz);
@@ -118,7 +118,7 @@ public final class JsonUtil {
      */
     public static <K, V> MultiValueMap<K, V> parseMultiValueMap(String context, Class<K> keyClazz, Class<V> valClazz) {
         MultiValueMap<K, V> map = new LinkedMultiValueMap<>();
-        if (context == null || "".equals(context) || keyClazz == null || valClazz == null)
+        if (context == null || context.isEmpty() || keyClazz == null || valClazz == null)
             return map;
         Map<K, V> kvMap = parseMap(context, keyClazz, valClazz);
         if (kvMap != null)
@@ -135,7 +135,7 @@ public final class JsonUtil {
      * @return Result<T>对象
      */
     public static <T extends Serializable> Result<T> parseResult(String context, Class<T> clazz) {
-        if (context == null || "".equals(context) || clazz == null)
+        if (context == null || context.isEmpty() || clazz == null)
             return null;
         try {
             JavaType javaType = objectMapper.getTypeFactory().constructParametricType(Result.class, clazz);

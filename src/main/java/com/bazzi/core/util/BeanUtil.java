@@ -37,7 +37,7 @@ public final class BeanUtil {
      * @return 属性值
      */
     public static <T> Object getValue(String fieldName, T t) {
-        if (fieldName == null || "".equals(fieldName) || t == null)
+        if (fieldName == null || fieldName.isEmpty() || t == null)
             return null;
         Object value = null;
         try {
@@ -78,7 +78,7 @@ public final class BeanUtil {
      * @param <T>       泛型对象
      */
     public static <T> void setField(T t, String fieldName, Object value) {
-        if (t == null || fieldName == null || "".equals(fieldName))
+        if (t == null || fieldName == null || fieldName.isEmpty())
             return;
         try {
             String setMethodName = F_SET + fieldName.substring(0, 1).toUpperCase()

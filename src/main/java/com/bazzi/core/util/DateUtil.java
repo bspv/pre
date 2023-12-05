@@ -25,7 +25,7 @@ public final class DateUtil {
      * @return 字符串日期
      */
     public static String formatDate(LocalDateTime ldt, String format) {
-        if (ldt == null || format == null || "".equals(format))
+        if (ldt == null || format == null || format.isEmpty())
             return null;
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
         return dtf.format(ldt);
@@ -39,7 +39,7 @@ public final class DateUtil {
      * @return 日期
      */
     public static LocalDateTime getDate(String strDate, String format) {
-        if (strDate == null || "".equals(strDate) || format == null || "".equals(format))
+        if (strDate == null || strDate.isEmpty() || format == null || format.isEmpty())
             return null;
         return LocalDateTime.parse(strDate, buildDateTimeFormatter(format));
     }
@@ -134,7 +134,7 @@ public final class DateUtil {
      */
     private static DateTimeFormatter buildDateTimeFormatter(String format) {
         String curFormat;
-        if (format == null || "".equals(format))//缺省的日期格式
+        if (format == null || format.isEmpty())//缺省的日期格式
             curFormat = YMD_FORMAT + SPACE_JOINER + TIME_PATTERN;
         else if (!format.contains(SPACE_JOINER)) //不包含时分秒
             curFormat = format + SPACE_JOINER + TIME_PATTERN;

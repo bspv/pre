@@ -19,7 +19,7 @@ public final class ProfileUtil {
 	public static String getActiveProfile() {
 		// 从设置参数里获取
 		String profile = System.getProperties().getProperty(PROFILE_ACTIVE_KEY);
-		if (profile == null || "".equals(profile)) {
+		if (profile == null || profile.isEmpty()) {
 			// 从yml文件里获取
 			Resource r = new ClassPathResource(YML_BASE_FILE);
 			YamlPropertiesFactoryBean baseYml = new YamlPropertiesFactoryBean();
@@ -27,6 +27,6 @@ public final class ProfileUtil {
 			Properties properties = baseYml.getObject();
 			profile = properties != null ? properties.getProperty(PROFILE_ACTIVE_KEY) : null;
 		}
-		return profile == null || "".equals(profile) ? DEFAULT_PROFILE : profile;
+		return profile == null || profile.isEmpty() ? DEFAULT_PROFILE : profile;
 	}
 }

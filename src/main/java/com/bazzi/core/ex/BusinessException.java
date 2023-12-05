@@ -1,7 +1,7 @@
 package com.bazzi.core.ex;
 
 public class BusinessException extends RuntimeException {
-	private static final long serialVersionUID = -1842031384136789937L;
+	private static final long serialVersionUID = -2413076818645911941L;
 	private String code;
 	private String message;
 

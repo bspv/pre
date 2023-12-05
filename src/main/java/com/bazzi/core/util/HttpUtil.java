@@ -187,9 +187,9 @@ public final class HttpUtil {
      * @return 请求结果
      */
     public static Result<String> sendPostInBody(String url, String param, Map<String, String> headerMap) {
-        if (url == null || "".equals(url))
+        if (url == null || url.isEmpty())
             throw new IllegalArgumentException("Property 'url' is required");
-        if (param == null || "".equals(param))
+        if (param == null || param.isEmpty())
             throw new IllegalArgumentException("Property 'param' is required");
         CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse response = null;

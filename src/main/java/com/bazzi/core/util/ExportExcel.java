@@ -44,7 +44,7 @@ public final class ExportExcel {
 										 List<T> body, List<String> total, Class<T> typeClazz, boolean isXlsx) {
 		if (outputStream == null || body == null || typeClazz == null)
 			throw new IllegalArgumentException("Property outputStream && body && typeClazz is required");
-		int rowTotal = (title == null || "".equals(title) ? 0 : 1) + 1 + body.size()
+		int rowTotal = (title == null || title.isEmpty() ? 0 : 1) + 1 + body.size()
 				+ (total == null ? 0 : total.size());//总行数
 		// 判断总行数是不是超过了最大的行数限制
 		if ((!isXlsx && rowTotal > XLS_ROW) || rowTotal > XLSX_ROW)
@@ -131,7 +131,7 @@ public final class ExportExcel {
 	 * @return 有标题返回1，否则返回0
 	 */
 	private static int createTitle(Workbook wb, Sheet sheet, String title, int colTotal) {
-		if (title != null && !"".equals(title)) {
+		if (title != null && !title.isEmpty()) {
 			mergedRegion(sheet, 0, 0, 0, colTotal - 1);
 			Row row = sheet.createRow(0);
 			row.setHeightInPoints(30);
@@ -216,7 +216,7 @@ public final class ExportExcel {
 	 * @param colTotal 列数
 	 */
 	private static void createTotal(Workbook wb, Sheet sheet, List<String> total, int rowTotal, int colTotal) {
-		if (total != null && total.size() > 0)
+		if (total != null && !total.isEmpty())
 			for (int i = 0; i < total.size(); i++) {
 				int index = rowTotal + i;
 				Row row = sheet.createRow(index);
