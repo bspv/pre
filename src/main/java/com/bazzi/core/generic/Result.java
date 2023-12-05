@@ -14,19 +14,6 @@ public final class Result<T extends Serializable> implements Serializable {
     private String message = "";
     private String code = "";
 
-    private Result() {
-    }
-
-//    public Result(T data) {
-//        this.data = data;
-//    }
-
-//    public void setError(String code, String message) {
-//        this.code = code;
-//        this.message = message;
-//        this.status = false;
-//    }
-
     /**
      * 构建一个data数据的成功结果
      *
@@ -35,10 +22,7 @@ public final class Result<T extends Serializable> implements Serializable {
      * @return 成功结果
      */
     public static <T extends Serializable> Result<T> success(T data) {
-//        Result<T> result = new Result<>();
-//        result.setData(data);
-//        return result;
-        return Result.<T>builder().data(data).build();
+        return Result.<T>builder().status(true).data(data).build();
     }
 
     /**
@@ -50,10 +34,7 @@ public final class Result<T extends Serializable> implements Serializable {
      * @return 失败结果
      */
     public static <T extends Serializable> Result<T> failure(String code, String message) {
-//        Result<T> result = new Result<>();
-//        result.setError(code, message);
-//        return result;
-        return Result.<T>builder().code(code).message(message).build();
+        return Result.<T>builder().status(false).code(code).message(message).build();
     }
 
 }

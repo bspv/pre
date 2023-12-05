@@ -18,18 +18,15 @@ public final class Page<T> implements Serializable {
     private boolean hasPrev;// 是否有上一页
     private boolean hasNext;// 是否有下一页
 
-    private Page() {
-    }
-
-    public Page(List<T> records, Integer pageIdx, Integer pageSize, Integer totalRow) {
-        this.records = records;
-        this.pageIdx = pageIdx;
-        this.pageSize = pageSize;
-        this.totalRow = totalRow;
-        this.totalPage = totalRow % pageSize == 0 ? totalRow / pageSize : totalRow / pageSize + 1;
-        this.hasPrev = pageIdx > 1;
-        this.hasNext = pageIdx < totalPage;
-    }
+//    public Page(List<T> records, Integer pageIdx, Integer pageSize, Integer totalRow) {
+//        this.records = records;
+//        this.pageIdx = pageIdx;
+//        this.pageSize = pageSize;
+//        this.totalRow = totalRow;
+//        this.totalPage = totalRow % pageSize == 0 ? totalRow / pageSize : totalRow / pageSize + 1;
+//        this.hasPrev = pageIdx > 1;
+//        this.hasNext = pageIdx < totalPage;
+//    }
 
     public static <T> Page<T> of(List<T> records, Integer pageIdx, Integer pageSize, Integer totalRow) {
         int totalPage = totalRow % pageSize == 0 ? totalRow / pageSize : totalRow / pageSize + 1;
