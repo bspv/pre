@@ -127,6 +127,78 @@ public final class DateUtil {
     }
 
     /**
+     * 返回最近一个月的天数数组，从远到近
+     *
+     * @param anchorLDT 锚定时间
+     * @return 日期数组
+     */
+    public static String[] daysOfLastMonth(LocalDateTime anchorLDT) {
+        LocalDateTime localDateTime = anchorLDT.minusMonths(1);
+        int dayNum = localDateTime.toLocalDate().lengthOfMonth();
+        return daysOfLDT(anchorLDT, dayNum);
+    }
+
+    /**
+     * 返回最近n天数组，从远到近
+     *
+     * @param anchorLDT 锚定时间
+     * @param n         天数
+     * @return 日期数组
+     */
+    public static String[] daysOfLDT(LocalDateTime anchorLDT, int n) {
+        if (anchorLDT == null || n <= 0)
+            return new String[0];
+        String[] res = new String[n];
+        for (int i = res.length - 1; i >= 0; i--) {
+            LocalDateTime localDateTime = anchorLDT.minusDays(n - i - 1);
+            res[i] = localDateTime.toString().substring(0, 10);
+        }
+        return res;
+    }
+
+    /**
+     * 返回最近N月数组，从远到近
+     *
+     * @param anchorLDT 锚定时间
+     * @param n         月数
+     * @return 月份数组
+     */
+    public static String[] monthsOfLDT(LocalDateTime anchorLDT, int n) {
+        if (anchorLDT == null || n <= 0)
+            return new String[0];
+        String[] res = new String[n];
+        for (int i = res.length - 1; i >= 0; i--) {
+            LocalDateTime localDateTime = anchorLDT.minusMonths(n - i - 1);
+            String month = localDateTime.toString().substring(0, 7);
+            res[i] = month;
+        }
+        return res;
+    }
+
+    /**
+     * 返回最近N季度数组，从远到近
+     *
+     * @param anchorLDT 锚定时间
+     * @param n         季度数量
+     * @param joiner    连接符，如-，则2024-1；-Q，则2024-Q1
+     * @return 季度数组
+     */
+    public static String[] quartersOfLDT(LocalDateTime anchorLDT, int n, String joiner) {
+        if (anchorLDT == null || n <= 0)
+            return new String[0];
+        joiner = joiner == null || joiner.isEmpty() ? "-" : joiner;
+        String[] res = new String[n];
+        for (int i = res.length - 1; i >= 0; i--) {
+            LocalDateTime localDateTime = anchorLDT.minusMonths(3L * (n - i - 1));
+            String year = localDateTime.toString().substring(0, 4);
+            int monthVal = localDateTime.getMonthValue();
+            int quarter = monthVal / 3 + (monthVal % 3 == 0 ? 0 : 1);
+            res[i] = year + joiner + quarter;
+        }
+        return res;
+    }
+
+    /**
      * 构建用于打印和解析日期时间对象的格式化程序 24小时制
      *
      * @param format 日期格式
