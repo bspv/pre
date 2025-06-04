@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @Builder
-public final class Page<T> implements Serializable {
+public final class Page<T extends Serializable> implements Serializable {
     private static final long serialVersionUID = 5564838797824564651L;
     @Builder.Default
     private Integer pageIdx = 1;// 当前页码
@@ -30,7 +30,8 @@ public final class Page<T> implements Serializable {
 //        this.hasNext = pageIdx < totalPage;
 //    }
 
-    public static <T> Page<T> of(List<T> records, Integer pageIdx, Integer pageSize, Integer totalRow) {
+    public static <T extends Serializable> Page<T> of(List<T> records,
+                                                      Integer pageIdx, Integer pageSize, Integer totalRow) {
         int totalPage = totalRow % pageSize == 0 ? totalRow / pageSize : totalRow / pageSize + 1;
         return Page.<T>builder().pageIdx(pageIdx)
                 .pageSize(pageSize).records(records)
