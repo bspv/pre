@@ -45,7 +45,7 @@ public final class CsvUtil {
      * @return 全量数据
      */
     public static List<String[]> read(String filePath, CsvConfig conf) {
-        return baseRead(() -> createBufferReader(filePath, conf), conf);
+        return baseRead(() -> buildBufferReader(filePath, conf), conf);
     }
 
     /**
@@ -66,7 +66,7 @@ public final class CsvUtil {
      * @return 全量数据
      */
     public static List<String[]> read(InputStream input, CsvConfig conf) {
-        return baseRead(() -> createBufferReader(input, conf), conf);
+        return baseRead(() -> buildBufferReader(input, conf), conf);
     }
 
     /**
@@ -107,7 +107,7 @@ public final class CsvUtil {
      * @return 全量数据
      */
     public static <T> List<T> readAsObject(String filePath, Class<T> clazz, CsvConfig conf) {
-        return baseReadAsObject(() -> createBufferReader(filePath, conf), clazz, conf);
+        return baseReadAsObject(() -> buildBufferReader(filePath, conf), clazz, conf);
     }
 
     /**
@@ -132,7 +132,7 @@ public final class CsvUtil {
      * @return 全量数据
      */
     public static <T> List<T> readAsObject(InputStream input, Class<T> clazz, CsvConfig conf) {
-        return baseReadAsObject(() -> createBufferReader(input, conf), clazz, conf);
+        return baseReadAsObject(() -> buildBufferReader(input, conf), clazz, conf);
     }
 
     /**
@@ -172,7 +172,7 @@ public final class CsvUtil {
      * @param conf          配置
      */
     public static void batchRead(String filePath, Consumer<List<String[]>> batchConsumer, CsvConfig conf) {
-        baseBatchRead(() -> createBufferReader(filePath, conf), batchConsumer, conf);
+        baseBatchRead(() -> buildBufferReader(filePath, conf), batchConsumer, conf);
     }
 
     /**
@@ -193,7 +193,7 @@ public final class CsvUtil {
      * @param conf          配置
      */
     public static void batchRead(InputStream input, Consumer<List<String[]>> batchConsumer, CsvConfig conf) {
-        baseBatchRead(() -> createBufferReader(input, conf), batchConsumer, conf);
+        baseBatchRead(() -> buildBufferReader(input, conf), batchConsumer, conf);
     }
 
     /**
@@ -251,7 +251,7 @@ public final class CsvUtil {
      * @param <T>           泛型
      */
     public static <T> void batchReadAsObject(String filePath, Class<T> clazz, Consumer<List<T>> batchConsumer, CsvConfig conf) {
-        baseBatchReadAsObject(() -> createBufferReader(filePath, conf), clazz, batchConsumer, conf);
+        baseBatchReadAsObject(() -> buildBufferReader(filePath, conf), clazz, batchConsumer, conf);
     }
 
     /**
@@ -276,7 +276,7 @@ public final class CsvUtil {
      * @param <T>           泛型
      */
     public static <T> void batchReadAsObject(InputStream input, Class<T> clazz, Consumer<List<T>> batchConsumer, CsvConfig conf) {
-        baseBatchReadAsObject(() -> createBufferReader(input, conf), clazz, batchConsumer, conf);
+        baseBatchReadAsObject(() -> buildBufferReader(input, conf), clazz, batchConsumer, conf);
     }
 
     /**
@@ -335,7 +335,7 @@ public final class CsvUtil {
      * @param conf     配置
      */
     public static void write(String filePath, List<String[]> data, String[] header, CsvConfig conf) {
-        batchWrite(filePath, createDataSupplier(data), header, conf);
+        batchWrite(filePath, buildDataSupplier(data), header, conf);
     }
 
     /**
@@ -358,7 +358,7 @@ public final class CsvUtil {
      * @param conf         配置
      */
     public static void batchWrite(String filePath, DataSupplier<String[]> dataSupplier, String[] header, CsvConfig conf) {
-        baseBatchWrite(() -> createBufferWriter(filePath, conf), dataSupplier, header, conf);
+        baseBatchWrite(() -> buildBufferWriter(filePath, conf), dataSupplier, header, conf);
     }
 
     /**
@@ -381,7 +381,7 @@ public final class CsvUtil {
      * @param conf   配置
      */
     public static void write(OutputStream output, List<String[]> data, String[] header, CsvConfig conf) {
-        batchWrite(output, createDataSupplier(data), header, conf);
+        batchWrite(output, buildDataSupplier(data), header, conf);
     }
 
     /**
@@ -404,7 +404,7 @@ public final class CsvUtil {
      * @param conf         配置
      */
     public static void batchWrite(OutputStream output, DataSupplier<String[]> dataSupplier, String[] header, CsvConfig conf) {
-        baseBatchWrite(() -> createBufferWriter(output, conf), dataSupplier, header, conf);
+        baseBatchWrite(() -> buildBufferWriter(output, conf), dataSupplier, header, conf);
     }
 
     /**
@@ -425,7 +425,7 @@ public final class CsvUtil {
 
             int pageIdx = 1;
             List<String[]> batch;
-            while (!(batch = dataSupplier.getBatch(pageIdx, conf.getPageSize())).isEmpty()) {
+            while (!(batch = dataSupplier.getPage(pageIdx, conf.getPageSize())).isEmpty()) {
                 csvWriter.writeAll(batch);
                 csvWriter.flush();
                 pageIdx++;
@@ -458,7 +458,7 @@ public final class CsvUtil {
     public static <T> void writeByObject(String filePath, List<T> data, String[] header, CsvConfig conf) {
         if (data == null || data.isEmpty())
             return;
-        batchWriteByObject(filePath, createDataSupplier(data), getGenerics(data.get(0)), header, conf);
+        batchWriteByObject(filePath, buildDataSupplier(data), getGenerics(data.get(0)), header, conf);
     }
 
     /**
@@ -484,7 +484,7 @@ public final class CsvUtil {
      * @param <T>          泛型
      */
     public static <T> void batchWriteByObject(String filePath, DataSupplier<T> dataSupplier, Class<T> clazz, String[] header, CsvConfig conf) {
-        baseBatchWriteByObject(() -> createBufferWriter(filePath, conf), dataSupplier, clazz, header, conf);
+        baseBatchWriteByObject(() -> buildBufferWriter(filePath, conf), dataSupplier, clazz, header, conf);
     }
 
     /**
@@ -510,7 +510,7 @@ public final class CsvUtil {
     public static <T> void writeByObject(OutputStream output, List<T> data, String[] header, CsvConfig conf) {
         if (data == null || data.isEmpty())
             return;
-        batchWriteByObject(output, createDataSupplier(data), getGenerics(data.get(0)), header, conf);
+        batchWriteByObject(output, buildDataSupplier(data), getGenerics(data.get(0)), header, conf);
     }
 
     /**
@@ -536,7 +536,7 @@ public final class CsvUtil {
      * @param <T>          泛型
      */
     public static <T> void batchWriteByObject(OutputStream output, DataSupplier<T> dataSupplier, Class<T> clazz, String[] header, CsvConfig conf) {
-        baseBatchWriteByObject(() -> createBufferWriter(output, conf), dataSupplier, clazz, header, conf);
+        baseBatchWriteByObject(() -> buildBufferWriter(output, conf), dataSupplier, clazz, header, conf);
     }
 
     /**
@@ -564,7 +564,7 @@ public final class CsvUtil {
                     .build();
             int pageIdx = 1;
             List<T> batch;
-            while (!(batch = dataSupplier.getBatch(pageIdx, conf.getPageSize())).isEmpty()) {
+            while (!(batch = dataSupplier.getPage(pageIdx, conf.getPageSize())).isEmpty()) {
                 beanToCsv.write(batch);
                 csvWriter.flush();
                 pageIdx++;
@@ -697,19 +697,19 @@ public final class CsvUtil {
         return strategy;
     }
 
-    private static BufferedReader createBufferReader(String filePath, CsvConfig conf) throws IOException {
-        return createBufferReader(Files.newInputStream(Paths.get(filePath)), conf);
+    private static BufferedReader buildBufferReader(String filePath, CsvConfig conf) throws IOException {
+        return buildBufferReader(Files.newInputStream(Paths.get(filePath)), conf);
     }
 
-    private static BufferedReader createBufferReader(InputStream input, CsvConfig conf) {
+    private static BufferedReader buildBufferReader(InputStream input, CsvConfig conf) {
         return new BufferedReader(new InputStreamReader(input, conf.getCharset()), conf.getBufferSize());
     }
 
-    private static BufferedWriter createBufferWriter(String filePath, CsvConfig conf) throws IOException {
-        return createBufferWriter(Files.newOutputStream(Paths.get(filePath)), conf);
+    private static BufferedWriter buildBufferWriter(String filePath, CsvConfig conf) throws IOException {
+        return buildBufferWriter(Files.newOutputStream(Paths.get(filePath)), conf);
     }
 
-    private static BufferedWriter createBufferWriter(OutputStream output, CsvConfig conf) {
+    private static BufferedWriter buildBufferWriter(OutputStream output, CsvConfig conf) {
         return new BufferedWriter(new OutputStreamWriter(output, conf.getCharset()), conf.getBufferSize());
     }
 
@@ -751,17 +751,17 @@ public final class CsvUtil {
      */
     @FunctionalInterface
     public interface DataSupplier<T> {
-        List<T> getBatch(int pageIdx, int pageSize);
+        List<T> getPage(int pageIdx, int pageSize);
     }
 
     /**
-     * 创建数据提供者
+     * 构建数据提供者
      *
      * @param data 全量数据
      * @param <T>  泛型
      * @return 数据提供者
      */
-    private static <T> DataSupplier<T> createDataSupplier(List<T> data) {
+    private static <T> DataSupplier<T> buildDataSupplier(List<T> data) {
         return (pageIdx, pageSize) -> {
             int offset = (pageIdx - 1) * pageSize;
 
