@@ -151,67 +151,67 @@ public final class CsvUtil {
     /**
      * 采用默认配置，从csv文件中批量消费读取的数组
      *
-     * @param filePath      文件路径
-     * @param batchConsumer 批量消费者
+     * @param filePath 文件路径
+     * @param consumer 数据消费者
      */
-    public static void batchRead(String filePath, Consumer<List<String[]>> batchConsumer) {
-        batchRead(filePath, batchConsumer, CsvConfig.builder().build());
+    public static void batchRead(String filePath, Consumer<List<String[]>> consumer) {
+        batchRead(filePath, consumer, CsvConfig.builder().build());
     }
 
     /**
      * 从csv文件中批量消费读取的数组
      *
-     * @param filePath      文件路径
-     * @param batchConsumer 批量消费者
-     * @param conf          配置
+     * @param filePath 文件路径
+     * @param consumer 数据消费者
+     * @param conf     配置
      */
-    public static void batchRead(String filePath, Consumer<List<String[]>> batchConsumer, CsvConfig conf) {
-        baseBatchRead(() -> buildBufferReader(filePath, conf), batchConsumer, conf);
+    public static void batchRead(String filePath, Consumer<List<String[]>> consumer, CsvConfig conf) {
+        baseBatchRead(() -> buildBufferReader(filePath, conf), consumer, conf);
     }
 
     /**
      * 采用默认配置，从文件流中批量消费读取的数组
      *
-     * @param input         文件流
-     * @param batchConsumer 批量消费者
+     * @param input    文件流
+     * @param consumer 数据消费者
      */
-    public static void batchRead(InputStream input, Consumer<List<String[]>> batchConsumer) {
-        batchRead(input, batchConsumer, CsvConfig.builder().build());
+    public static void batchRead(InputStream input, Consumer<List<String[]>> consumer) {
+        batchRead(input, consumer, CsvConfig.builder().build());
     }
 
     /**
      * 从文件流中批量消费读取的数组
      *
-     * @param input         文件流
-     * @param batchConsumer 批量消费者
-     * @param conf          配置
+     * @param input    文件流
+     * @param consumer 数据消费者
+     * @param conf     配置
      */
-    public static void batchRead(InputStream input, Consumer<List<String[]>> batchConsumer, CsvConfig conf) {
-        baseBatchRead(() -> buildBufferReader(input, conf), batchConsumer, conf);
+    public static void batchRead(InputStream input, Consumer<List<String[]>> consumer, CsvConfig conf) {
+        baseBatchRead(() -> buildBufferReader(input, conf), consumer, conf);
     }
 
     /**
      * 批量读取成数组
      *
-     * @param supplier      BufferedReader
-     * @param batchConsumer 批量消费者
-     * @param conf          配置
+     * @param supplier BufferedReader
+     * @param consumer 数据消费者
+     * @param conf     配置
      */
-    private static void baseBatchRead(BufferReaderSupplier supplier, Consumer<List<String[]>> batchConsumer, CsvConfig conf) {
+    private static void baseBatchRead(BufferReaderSupplier supplier, Consumer<List<String[]>> consumer, CsvConfig conf) {
         try (CSVReader csvReader = buildCsvReader(supplier.get(), conf)) {
             List<String[]> batchList = new ArrayList<>(conf.getPageSize());
             String[] nextLine;
             while ((nextLine = csvReader.readNext()) != null) {
                 batchList.add(nextLine);
                 if (batchList.size() >= conf.getPageSize()) {
-                    batchConsumer.accept(batchList);
+                    consumer.accept(batchList);
 
                     batchList = new ArrayList<>(conf.getPageSize());
                 }
             }
 
             if (!batchList.isEmpty()) {
-                batchConsumer.accept(batchList);
+                consumer.accept(batchList);
             }
         } catch (Exception e) {
             handleException(e);
@@ -221,58 +221,58 @@ public final class CsvUtil {
     /**
      * 采用默认配置，从csv文件中批量消费读取的对象
      *
-     * @param filePath      文件路径
-     * @param clazz         类型
-     * @param batchConsumer 批量消费者
+     * @param filePath 文件路径
+     * @param clazz    类型
+     * @param consumer 数据消费者
      */
-    public static <T> void batchReadAsObject(String filePath, Class<T> clazz, Consumer<List<T>> batchConsumer) {
-        batchReadAsObject(filePath, clazz, batchConsumer, CsvConfig.builder().build());
+    public static <T> void batchReadAsObject(String filePath, Class<T> clazz, Consumer<List<T>> consumer) {
+        batchReadAsObject(filePath, clazz, consumer, CsvConfig.builder().build());
     }
 
     /**
      * 从csv文件中批量消费读取的对象
      *
-     * @param filePath      文件路径
-     * @param clazz         类型
-     * @param batchConsumer 批量消费者
-     * @param conf          配置
+     * @param filePath 文件路径
+     * @param clazz    类型
+     * @param consumer 数据消费者
+     * @param conf     配置
      */
-    public static <T> void batchReadAsObject(String filePath, Class<T> clazz, Consumer<List<T>> batchConsumer, CsvConfig conf) {
-        baseBatchReadAsObject(() -> buildBufferReader(filePath, conf), clazz, batchConsumer, conf);
+    public static <T> void batchReadAsObject(String filePath, Class<T> clazz, Consumer<List<T>> consumer, CsvConfig conf) {
+        baseBatchReadAsObject(() -> buildBufferReader(filePath, conf), clazz, consumer, conf);
     }
 
     /**
      * 采用默认配置，从文件流中批量消费读取的对象
      *
-     * @param input         文件流
-     * @param clazz         类型
-     * @param batchConsumer 批量消费者
+     * @param input    文件流
+     * @param clazz    类型
+     * @param consumer 数据消费者
      */
-    public static <T> void batchReadAsObject(InputStream input, Class<T> clazz, Consumer<List<T>> batchConsumer) {
-        batchReadAsObject(input, clazz, batchConsumer, CsvConfig.builder().build());
+    public static <T> void batchReadAsObject(InputStream input, Class<T> clazz, Consumer<List<T>> consumer) {
+        batchReadAsObject(input, clazz, consumer, CsvConfig.builder().build());
     }
 
     /**
      * 从文件流中批量消费读取的对象
      *
-     * @param input         文件流
-     * @param clazz         类型
-     * @param batchConsumer 批量消费者
-     * @param conf          配置
+     * @param input    文件流
+     * @param clazz    类型
+     * @param consumer 数据消费者
+     * @param conf     配置
      */
-    public static <T> void batchReadAsObject(InputStream input, Class<T> clazz, Consumer<List<T>> batchConsumer, CsvConfig conf) {
-        baseBatchReadAsObject(() -> buildBufferReader(input, conf), clazz, batchConsumer, conf);
+    public static <T> void batchReadAsObject(InputStream input, Class<T> clazz, Consumer<List<T>> consumer, CsvConfig conf) {
+        baseBatchReadAsObject(() -> buildBufferReader(input, conf), clazz, consumer, conf);
     }
 
     /**
      * 批量读取成对象
      *
-     * @param supplier      BufferedReader
-     * @param clazz         类型
-     * @param batchConsumer 批量消费者
-     * @param conf          配置
+     * @param supplier BufferedReader
+     * @param clazz    类型
+     * @param consumer 数据消费者
+     * @param conf     配置
      */
-    private static <T> void baseBatchReadAsObject(BufferReaderSupplier supplier, Class<T> clazz, Consumer<List<T>> batchConsumer, CsvConfig conf) {
+    private static <T> void baseBatchReadAsObject(BufferReaderSupplier supplier, Class<T> clazz, Consumer<List<T>> consumer, CsvConfig conf) {
         try (BufferedReader bufferedReader = supplier.get()) {
             CsvToBean<T> csvToBean = buildCsvToBean(bufferedReader, clazz, conf);
 
@@ -280,14 +280,14 @@ public final class CsvUtil {
             for (T obj : csvToBean) {
                 batchList.add(obj);
                 if (batchList.size() >= conf.getPageSize()) {
-                    batchConsumer.accept(batchList);
+                    consumer.accept(batchList);
 
                     batchList = new ArrayList<>(conf.getPageSize());
                 }
             }
 
             if (!batchList.isEmpty()) {
-                batchConsumer.accept(batchList);
+                consumer.accept(batchList);
             }
         } catch (Exception e) {
             handleException(e);
