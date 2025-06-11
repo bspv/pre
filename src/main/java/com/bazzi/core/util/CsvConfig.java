@@ -21,6 +21,6 @@ public final class CsvConfig {
     @Builder.Default
     private int pageSize = 5000; // 分页大小，每次处理的行数
     @Builder.Default
-    private int bufferSize = 1024 * 1024; // 缓冲区大小，默认1MB
+    private int charBufferSize = 64 * 1024; // 缓冲区大小，缺省按照SSD硬盘配置，Java默认缓冲区大小为 8192 字符（约16KB，每个Java char占 2 字节）
 
 }

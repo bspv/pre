@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 public final class CsvUtil {
     private static final char DEFAULT_QUOTE = ICSVParser.DEFAULT_QUOTE_CHARACTER;
     private static final char DEFAULT_ESCAPE = ICSVParser.DEFAULT_ESCAPE_CHARACTER;
-    private static final int LIST_CREATE_THRESHOLD = 1000; // 新建List阈值，默认1000
 
     private CsvUtil() {
         throw new UnsupportedOperationException("不能创建CsvUtil对象");
@@ -76,9 +75,9 @@ public final class CsvUtil {
      * @param conf     配置
      * @return 全量数据
      */
-    private static List<String[]> baseRead(ReaderSupplier supplier, CsvConfig conf) {
-        try (CSVReader reader = buildCsvReader(supplier.get(), conf)) {
-            return reader.readAll();
+    private static List<String[]> baseRead(BufferReaderSupplier supplier, CsvConfig conf) {
+        try (CSVReader csvReader = buildCsvReader(supplier.get(), conf)) {
+            return csvReader.readAll();
         } catch (Exception e) {
             handleException(e);
             return Collections.emptyList();
@@ -90,7 +89,6 @@ public final class CsvUtil {
      *
      * @param filePath 文件路径
      * @param clazz    类型
-     * @param <T>      泛型
      * @return 全量数据
      */
     public static <T> List<T> readAsObject(String filePath, Class<T> clazz) {
@@ -103,7 +101,6 @@ public final class CsvUtil {
      * @param filePath 文件路径
      * @param clazz    类型
      * @param conf     配置
-     * @param <T>      泛型
      * @return 全量数据
      */
     public static <T> List<T> readAsObject(String filePath, Class<T> clazz, CsvConfig conf) {
@@ -115,7 +112,6 @@ public final class CsvUtil {
      *
      * @param input 文件流
      * @param clazz 类型
-     * @param <T>   泛型
      * @return 全量数据
      */
     public static <T> List<T> readAsObject(InputStream input, Class<T> clazz) {
@@ -128,7 +124,6 @@ public final class CsvUtil {
      * @param input 文件流
      * @param clazz 类型
      * @param conf  配置
-     * @param <T>   泛型
      * @return 全量数据
      */
     public static <T> List<T> readAsObject(InputStream input, Class<T> clazz, CsvConfig conf) {
@@ -141,12 +136,11 @@ public final class CsvUtil {
      * @param supplier BufferedReader
      * @param clazz    类型
      * @param conf     配置
-     * @param <T>      泛型
      * @return 全量数据
      */
-    private static <T> List<T> baseReadAsObject(ReaderSupplier supplier, Class<T> clazz, CsvConfig conf) {
-        try (Reader reader = supplier.get()) {
-            CsvToBean<T> csvToBean = buildCsvToBean(reader, clazz, conf);
+    private static <T> List<T> baseReadAsObject(BufferReaderSupplier supplier, Class<T> clazz, CsvConfig conf) {
+        try (BufferedReader bufferedReader = supplier.get()) {
+            CsvToBean<T> csvToBean = buildCsvToBean(bufferedReader, clazz, conf);
             return csvToBean.parse();
         } catch (IOException e) {
             handleException(e);
@@ -203,26 +197,21 @@ public final class CsvUtil {
      * @param batchConsumer 批量消费者
      * @param conf          配置
      */
-    private static void baseBatchRead(ReaderSupplier supplier, Consumer<List<String[]>> batchConsumer, CsvConfig conf) {
-        try (CSVReader reader = buildCsvReader(supplier.get(), conf)) {
+    private static void baseBatchRead(BufferReaderSupplier supplier, Consumer<List<String[]>> batchConsumer, CsvConfig conf) {
+        try (CSVReader csvReader = buildCsvReader(supplier.get(), conf)) {
             List<String[]> batchList = new ArrayList<>(conf.getPageSize());
             String[] nextLine;
-            while ((nextLine = reader.readNext()) != null) {
+            while ((nextLine = csvReader.readNext()) != null) {
                 batchList.add(nextLine);
                 if (batchList.size() >= conf.getPageSize()) {
-                    batchConsumer.accept(Collections.unmodifiableList(batchList));
+                    batchConsumer.accept(batchList);
 
-                    // 重用策略，小批次清空重用、大批次新建
-                    if (conf.getPageSize() <= LIST_CREATE_THRESHOLD) {
-                        batchList.clear();
-                    } else {
-                        batchList = new ArrayList<>(conf.getPageSize());
-                    }
+                    batchList = new ArrayList<>(conf.getPageSize());
                 }
             }
 
             if (!batchList.isEmpty()) {
-                batchConsumer.accept(Collections.unmodifiableList(batchList));
+                batchConsumer.accept(batchList);
             }
         } catch (Exception e) {
             handleException(e);
@@ -235,7 +224,6 @@ public final class CsvUtil {
      * @param filePath      文件路径
      * @param clazz         类型
      * @param batchConsumer 批量消费者
-     * @param <T>           泛型
      */
     public static <T> void batchReadAsObject(String filePath, Class<T> clazz, Consumer<List<T>> batchConsumer) {
         batchReadAsObject(filePath, clazz, batchConsumer, CsvConfig.builder().build());
@@ -248,7 +236,6 @@ public final class CsvUtil {
      * @param clazz         类型
      * @param batchConsumer 批量消费者
      * @param conf          配置
-     * @param <T>           泛型
      */
     public static <T> void batchReadAsObject(String filePath, Class<T> clazz, Consumer<List<T>> batchConsumer, CsvConfig conf) {
         baseBatchReadAsObject(() -> buildBufferReader(filePath, conf), clazz, batchConsumer, conf);
@@ -260,7 +247,6 @@ public final class CsvUtil {
      * @param input         文件流
      * @param clazz         类型
      * @param batchConsumer 批量消费者
-     * @param <T>           泛型
      */
     public static <T> void batchReadAsObject(InputStream input, Class<T> clazz, Consumer<List<T>> batchConsumer) {
         batchReadAsObject(input, clazz, batchConsumer, CsvConfig.builder().build());
@@ -273,7 +259,6 @@ public final class CsvUtil {
      * @param clazz         类型
      * @param batchConsumer 批量消费者
      * @param conf          配置
-     * @param <T>           泛型
      */
     public static <T> void batchReadAsObject(InputStream input, Class<T> clazz, Consumer<List<T>> batchConsumer, CsvConfig conf) {
         baseBatchReadAsObject(() -> buildBufferReader(input, conf), clazz, batchConsumer, conf);
@@ -286,29 +271,23 @@ public final class CsvUtil {
      * @param clazz         类型
      * @param batchConsumer 批量消费者
      * @param conf          配置
-     * @param <T>           泛型
      */
-    private static <T> void baseBatchReadAsObject(ReaderSupplier supplier, Class<T> clazz, Consumer<List<T>> batchConsumer, CsvConfig conf) {
-        try (Reader reader = supplier.get()) {
-            CsvToBean<T> csvToBean = buildCsvToBean(reader, clazz, conf);
+    private static <T> void baseBatchReadAsObject(BufferReaderSupplier supplier, Class<T> clazz, Consumer<List<T>> batchConsumer, CsvConfig conf) {
+        try (BufferedReader bufferedReader = supplier.get()) {
+            CsvToBean<T> csvToBean = buildCsvToBean(bufferedReader, clazz, conf);
 
             List<T> batchList = new ArrayList<>(conf.getPageSize());
             for (T obj : csvToBean) {
                 batchList.add(obj);
                 if (batchList.size() >= conf.getPageSize()) {
-                    batchConsumer.accept(Collections.unmodifiableList(batchList));
+                    batchConsumer.accept(batchList);
 
-                    // 重用策略，小批次清空重用、大批次新建
-                    if (conf.getPageSize() <= LIST_CREATE_THRESHOLD) {
-                        batchList.clear();
-                    } else {
-                        batchList = new ArrayList<>(conf.getPageSize());
-                    }
+                    batchList = new ArrayList<>(conf.getPageSize());
                 }
             }
 
             if (!batchList.isEmpty()) {
-                batchConsumer.accept(Collections.unmodifiableList(batchList));
+                batchConsumer.accept(batchList);
             }
         } catch (Exception e) {
             handleException(e);
@@ -415,7 +394,7 @@ public final class CsvUtil {
      * @param header       列头数组
      * @param conf         配置
      */
-    private static void baseBatchWrite(WriterSupplier supplier, DataSupplier<String[]> dataSupplier, String[] header, CsvConfig conf) {
+    private static void baseBatchWrite(BufferedWriterSupplier supplier, DataSupplier<String[]> dataSupplier, String[] header, CsvConfig conf) {
         try {
             ICSVWriter csvWriter = buildCsvWriter(supplier.get(), conf.getSeparator());
 
@@ -440,7 +419,6 @@ public final class CsvUtil {
      *
      * @param filePath 文件路径
      * @param data     数据
-     * @param <T>      泛型
      */
     public static <T> void writeByObject(String filePath, List<T> data) {
         writeByObject(filePath, data, null, CsvConfig.builder().build());
@@ -453,7 +431,6 @@ public final class CsvUtil {
      * @param data     数据
      * @param header   列头
      * @param conf     配置
-     * @param <T>      泛型
      */
     public static <T> void writeByObject(String filePath, List<T> data, String[] header, CsvConfig conf) {
         if (data == null || data.isEmpty())
@@ -467,7 +444,6 @@ public final class CsvUtil {
      * @param filePath     文件路径
      * @param dataSupplier 数据提供者
      * @param clazz        类型
-     * @param <T>          泛型
      */
     public static <T> void batchWriteByObject(String filePath, DataSupplier<T> dataSupplier, Class<T> clazz) {
         batchWriteByObject(filePath, dataSupplier, clazz, null, CsvConfig.builder().build());
@@ -481,7 +457,6 @@ public final class CsvUtil {
      * @param clazz        类型
      * @param header       列头
      * @param conf         配置
-     * @param <T>          泛型
      */
     public static <T> void batchWriteByObject(String filePath, DataSupplier<T> dataSupplier, Class<T> clazz, String[] header, CsvConfig conf) {
         baseBatchWriteByObject(() -> buildBufferWriter(filePath, conf), dataSupplier, clazz, header, conf);
@@ -492,7 +467,6 @@ public final class CsvUtil {
      *
      * @param output 文件流
      * @param data   数据
-     * @param <T>    泛型
      */
     public static <T> void writeByObject(OutputStream output, List<T> data) {
         writeByObject(output, data, null, CsvConfig.builder().build());
@@ -505,7 +479,6 @@ public final class CsvUtil {
      * @param data   数据
      * @param header 列头
      * @param conf   配置
-     * @param <T>    泛型
      */
     public static <T> void writeByObject(OutputStream output, List<T> data, String[] header, CsvConfig conf) {
         if (data == null || data.isEmpty())
@@ -519,7 +492,6 @@ public final class CsvUtil {
      * @param output       文件流
      * @param dataSupplier 数据提供者
      * @param clazz        类型
-     * @param <T>          泛型
      */
     public static <T> void batchWriteByObject(OutputStream output, DataSupplier<T> dataSupplier, Class<T> clazz) {
         batchWriteByObject(output, dataSupplier, clazz, null, CsvConfig.builder().build());
@@ -533,7 +505,6 @@ public final class CsvUtil {
      * @param clazz        类型
      * @param header       列头
      * @param conf         配置
-     * @param <T>          泛型
      */
     public static <T> void batchWriteByObject(OutputStream output, DataSupplier<T> dataSupplier, Class<T> clazz, String[] header, CsvConfig conf) {
         baseBatchWriteByObject(() -> buildBufferWriter(output, conf), dataSupplier, clazz, header, conf);
@@ -547,9 +518,8 @@ public final class CsvUtil {
      * @param clazz        类型
      * @param header       列头数组
      * @param conf         配置
-     * @param <T>          泛型
      */
-    private static <T> void baseBatchWriteByObject(WriterSupplier supplier, DataSupplier<T> dataSupplier, Class<T> clazz, String[] header, CsvConfig conf) {
+    private static <T> void baseBatchWriteByObject(BufferedWriterSupplier supplier, DataSupplier<T> dataSupplier, Class<T> clazz, String[] header, CsvConfig conf) {
         try {
             MappingStrategy<T> mappingStrategy = buildMappingStrategy(clazz);
             boolean isPositionMapping = mappingStrategy.getClass().isAssignableFrom(ColumnPositionMappingStrategy.class);
@@ -577,12 +547,12 @@ public final class CsvUtil {
     /**
      * 创建CSVWriter
      *
-     * @param writer    写入器
-     * @param separator 分隔符
+     * @param bufferedWriter 写入器
+     * @param separator      分隔符
      * @return CSVWriter
      */
-    private static ICSVWriter buildCsvWriter(Writer writer, char separator) {
-        return new CSVWriterBuilder(writer)
+    private static ICSVWriter buildCsvWriter(BufferedWriter bufferedWriter, char separator) {
+        return new CSVWriterBuilder(bufferedWriter)
                 .withSeparator(separator)
                 .withQuoteChar(ICSVWriter.NO_QUOTE_CHARACTER)
                 .withEscapeChar(ICSVWriter.NO_ESCAPE_CHARACTER)
@@ -594,7 +564,6 @@ public final class CsvUtil {
      * 获取类中带CsvBindByName注解的字段，采用column值组成列头数组
      *
      * @param clazz 类型
-     * @param <T>泛型
      * @return 属性名CsvBindByName的column值组成的列头数组
      */
     private static <T> Comparator<String> buildComparator(Class<T> clazz) {
@@ -608,7 +577,6 @@ public final class CsvUtil {
      * 从类中获取带CsvBindByPosition注解的字段，按照position值排序
      *
      * @param clazz 类
-     * @param <T>   泛型
      * @return 属性名组成的列头数组
      */
     private static <T> String[] getHeaderByPosition(Class<T> clazz) {
@@ -622,7 +590,6 @@ public final class CsvUtil {
      * 获取类型
      *
      * @param obj 对象
-     * @param <T> 泛型
      * @return 获取类型
      */
     @SuppressWarnings("unchecked")
@@ -633,19 +600,19 @@ public final class CsvUtil {
     /**
      * 构建CsvReader
      *
-     * @param reader 读取器
-     * @param conf   配置
+     * @param bufferedReader 读取器
+     * @param conf           配置
      * @return CSVReader
      */
-    private static CSVReader buildCsvReader(Reader reader, CsvConfig conf) {
-        CSVParser parser = new CSVParserBuilder()
+    private static CSVReader buildCsvReader(BufferedReader bufferedReader, CsvConfig conf) {
+        CSVParser csvParser = new CSVParserBuilder()
                 .withSeparator(conf.getSeparator())
                 .withQuoteChar(DEFAULT_QUOTE)
                 .withEscapeChar(DEFAULT_ESCAPE)
                 .build();
 
-        return new CSVReaderBuilder(reader)
-                .withCSVParser(parser)
+        return new CSVReaderBuilder(bufferedReader)
+                .withCSVParser(csvParser)
                 .withSkipLines(conf.isHasHeader() ? 1 : 0)
                 .build();
     }
@@ -653,21 +620,21 @@ public final class CsvUtil {
     /**
      * 构建CsvToBean
      *
-     * @param reader 读取器
-     * @param clazz  类型
-     * @param conf   配置
-     * @param <T>    泛型
+     * @param bufferedReader 读取器
+     * @param clazz          类型
+     * @param conf           配置
      * @return CsvToBean
      */
-    private static <T> CsvToBean<T> buildCsvToBean(Reader reader, Class<T> clazz, CsvConfig conf) {
+    private static <T> CsvToBean<T> buildCsvToBean(BufferedReader bufferedReader, Class<T> clazz, CsvConfig conf) {
         MappingStrategy<T> mappingStrategy = buildMappingStrategy(clazz);
         boolean isPositionMapping = mappingStrategy.getClass().isAssignableFrom(ColumnPositionMappingStrategy.class);
         int skipLines = isPositionMapping && conf.isHasHeader() ? 1 : 0;
-        return new CsvToBeanBuilder<T>(reader)
+        return new CsvToBeanBuilder<T>(bufferedReader)
                 .withType(clazz)
                 .withMappingStrategy(mappingStrategy)
                 .withSeparator(conf.getSeparator())
                 .withQuoteChar(DEFAULT_QUOTE)
+                .withEscapeChar(DEFAULT_ESCAPE)
                 .withIgnoreLeadingWhiteSpace(true)
                 .withSkipLines(skipLines)
                 .build();
@@ -677,7 +644,6 @@ public final class CsvUtil {
      * 构建映射策略
      *
      * @param clazz 类型
-     * @param <T>   泛型
      * @return 返回映射策略
      */
     private static <T> MappingStrategy<T> buildMappingStrategy(Class<T> clazz) {
@@ -697,20 +663,50 @@ public final class CsvUtil {
         return strategy;
     }
 
+    /**
+     * 根据文件路径、编码、字符缓存区大小，构建BufferedReader
+     *
+     * @param filePath 文件路径
+     * @param conf     配置
+     * @return BufferedReader
+     * @throws IOException 异常
+     */
     private static BufferedReader buildBufferReader(String filePath, CsvConfig conf) throws IOException {
         return buildBufferReader(Files.newInputStream(Paths.get(filePath)), conf);
     }
 
+    /**
+     * 根据输入流、编码、字符缓存区大小，构建BufferedReader
+     *
+     * @param input 输入流
+     * @param conf  配置
+     * @return BufferedReader
+     */
     private static BufferedReader buildBufferReader(InputStream input, CsvConfig conf) {
-        return new BufferedReader(new InputStreamReader(input, conf.getCharset()), conf.getBufferSize());
+        return new BufferedReader(new InputStreamReader(input, conf.getCharset()), conf.getCharBufferSize());
     }
 
+    /**
+     * 根据文件路径、编码、字符缓存区大小，构建BufferedWriter
+     *
+     * @param filePath 文件路径
+     * @param conf     配置
+     * @return BufferedWriter
+     * @throws IOException 异常
+     */
     private static BufferedWriter buildBufferWriter(String filePath, CsvConfig conf) throws IOException {
         return buildBufferWriter(Files.newOutputStream(Paths.get(filePath)), conf);
     }
 
+    /**
+     * 根据输出流、编码、字符缓存区大小，构建BufferedWriter
+     *
+     * @param output 输出流
+     * @param conf   配置
+     * @return BufferedWriter
+     */
     private static BufferedWriter buildBufferWriter(OutputStream output, CsvConfig conf) {
-        return new BufferedWriter(new OutputStreamWriter(output, conf.getCharset()), conf.getBufferSize());
+        return new BufferedWriter(new OutputStreamWriter(output, conf.getCharset()), conf.getCharBufferSize());
     }
 
     /**
@@ -728,26 +724,31 @@ public final class CsvUtil {
         } else if (e instanceof IOException) {
             log.error("CSV 文件读取/写入失败: {}", e.getMessage());
         } else {
+            //其他异常，记录堆栈信息
             log.error(e.getMessage(), e);
         }
+
         throw new IllegalArgumentException(e);
     }
 
-
+    /**
+     * 构建BufferReader提供者
+     */
     @FunctionalInterface
-    private interface ReaderSupplier {
+    private interface BufferReaderSupplier {
         BufferedReader get() throws IOException;
     }
 
+    /**
+     * 构建BufferWriter提供者
+     */
     @FunctionalInterface
-    private interface WriterSupplier {
+    private interface BufferedWriterSupplier {
         BufferedWriter get() throws IOException;
     }
 
     /**
      * 用于批量提供数据，分页返回，避免一次性加载全量数据
-     *
-     * @param <T> 泛型
      */
     @FunctionalInterface
     public interface DataSupplier<T> {
@@ -758,7 +759,6 @@ public final class CsvUtil {
      * 构建数据提供者
      *
      * @param data 全量数据
-     * @param <T>  泛型
      * @return 数据提供者
      */
     private static <T> DataSupplier<T> buildDataSupplier(List<T> data) {
