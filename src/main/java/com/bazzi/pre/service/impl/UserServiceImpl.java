@@ -5,6 +5,8 @@ import com.bazzi.pre.model.User;
 import com.bazzi.pre.service.UserService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -12,7 +14,7 @@ import java.util.List;
 
 @Component
 public class UserServiceImpl implements UserService {
-
+	private static final Logger logger = LoggerFactory.getLogger("demo-info");
 	@Resource
 	private UserMapper userMapper;
 
@@ -26,6 +28,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public PageInfo<User> findPage(int idx, int pageSize) {
+		logger.error("findPage");
 		PageHelper.startPage(idx, pageSize);
 		List<User> list = userMapper.selectByLikeKey("user_");
 		return PageInfo.of(list);

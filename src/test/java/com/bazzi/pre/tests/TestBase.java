@@ -9,14 +9,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @ExtendWith(SpringExtension.class)
@@ -28,8 +31,12 @@ public class TestBase {
 
 	@BeforeEach// 设置testRestTemplate编码格式
 	public void beforeController() {
-		testRestTemplate.getRestTemplate().setMessageConverters(
-				Collections.singletonList(new StringHttpMessageConverter(Charset.defaultCharset())));
+		List<HttpMessageConverter<?>> list = new ArrayList<>();
+		list.add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
+		list.add(new MappingJackson2HttpMessageConverter());
+		testRestTemplate.getRestTemplate().setMessageConverters(list);
+//		testRestTemplate.getRestTemplate().setMessageConverters(
+//				Collections.singletonList(new StringHttpMessageConverter(Charset.defaultCharset())));
 	}
 
 	/**

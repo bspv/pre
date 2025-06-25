@@ -14,6 +14,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.Length;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +40,8 @@ public class HelloController {
 	private UserService userService;
 	@Resource
 	private AsyncService asyncService;
+
+	private static final Logger logger = LoggerFactory.getLogger("demo-info");
 
 	@GetMapping(value = "lock", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Result<Boolean> lock() {
@@ -76,10 +81,14 @@ public class HelloController {
 		return Result.success(objectMapper.writeValueAsString(list));
 	}
 
-//	@AllowAccess
-	@GetMapping(value = "p", produces = MediaType.APPLICATION_JSON_VALUE)
+	@AllowAccess
+	@GetMapping(value = "p")
 	public Result<PageInfo<User>> p() {
-		return Result.success(userService.findPage(2, 3));
+		MDC.put("trace","12121212");
+		logger.error("this is test for log");
+		PageInfo<User> page = userService.findPage(2, 3);
+		MDC.clear();
+		return Result.success(page);
 	}
 
 	@AllowAccess
