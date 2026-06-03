@@ -1,0 +1,9 @@
+ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"
+
+export serverIp=`ifconfig eth0 | grep 'inet addr' | awk '{print $2}' | cut -d':' -f2`
+export serverIp=`ifconfig ens33|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
+
+mvn dependency:tree -Ddetail=true
+
+nohup java -Xdebug -Xrunjdwp:transport=dt_socket,address=9101,server=y,suspend=y -jar pre.jar > pre.jar.out  2>&1 &
+nohup java -Xdebug -Xrunjdwp:transport=dt_socket,address=9101,server=y,suspend=y -jar pre.jar > log.out  2>&1 &

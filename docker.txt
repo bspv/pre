@@ -1,0 +1,21 @@
+docker-compose -f /log/docker-compose.yml up -d
+-f:指定yml文件
+-d:后台启动
+up启动
+
+
+编译
+新建数据卷
+docker volume create --name maven-repo
+在var/lib/docker/volume/maven-repo/_data/下放置settings.xml文件
+在项目根目录下执行编译
+pre
+docker run -it --rm -v "$(pwd)":/app -w /app -v maven-repo:/usr/share/maven/ref maven:3.6.3-jdk-8-slim mvn clean package -pl pre -am -P dev  -Dmaven.test.skip=true
+
+在项目根目录下进行构建镜像
+pre
+docker build -f Dockerfile -t pre .
+
+运行镜像
+pre
+docker run -d -v /data/logs/:/data/logs/ -p 9001:9001 --name=pre pre:latest

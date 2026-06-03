@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Properties>
+        <Property name="LOG_NAME" value="${spring:spring.application.name}"/>
+        <Property name="LOG_HOME" value="${spring:logging.file.path}"/>
+        <Property name="LOG_LEVEL" value="${spring:logging.level.root}"/>
+        <Property name="LOG_FILE_CHARSET" value="${spring:logging.charset.file}"/>
+        <Property name="LOG_CONSOLE_CHARSET" value="${spring:logging.charset.console}"/>
+
+        <Property name="LOG_FILE_SIZE" value="500MB"/>
+        <Property name="LOG_MAX_DAY" value="60d"/>
+        <Property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS}|%-5p|%t|%c{1.}|%m%n"/>
+        <Property name="LOG_CONSOLE_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS}|%-5p|%t|%c{1.}|%M|%L|%m%n"/>
+    </Properties>
+
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT" follow="true">
+            <ThresholdFilter level="${LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${LOG_CONSOLE_CHARSET}" pattern="${LOG_CONSOLE_PATTERN}"/>
+        </Console>
+
+        <!--debug 输出到滚动保存的文件, 触发保存日志文件的条件是每小时第一次的日志事件。-->
+        <RollingFile name="debugLog" fileName="${LOG_HOME}/debug/${LOG_NAME}-debug.log"
+                     filePattern="${LOG_HOME}/debug/${LOG_NAME}-debug-%d{yyyy-MM-dd_HH}.log.gz">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${LOG_FILE_CHARSET}" pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="${LOG_FILE_SIZE}"/>
+            </Policies>
+            <!-- 最多备份30天以内的日志，此处为策略限制，Delete中可以按自己需要用正则表达式编写 -->
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_HOME}/debug" maxDepth="1">
+                    <IfFileName glob="${LOG_NAME}-debug-*.log.gz"/>
+                    <IfLastModified age="${LOG_MAX_DAY}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!--info 输出到滚动保存的文件, 触发保存日志文件的条件是每小时第一次的日志事件。-->
+        <RollingFile name="infoLog" fileName="${LOG_HOME}/info/${LOG_NAME}-info.log"
+                     filePattern="${LOG_HOME}/info/${LOG_NAME}-info-%d{yyyy-MM-dd_HH}.log.gz">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${LOG_FILE_CHARSET}" pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="${LOG_FILE_SIZE}"/>
+            </Policies>
+            <!-- 最多备份30天以内的日志，此处为策略限制，Delete中可以按自己需要用正则表达式编写 -->
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_HOME}/info" maxDepth="1">
+                    <IfFileName glob="${LOG_NAME}-info-*.log.gz"/>
+                    <IfLastModified age="${LOG_MAX_DAY}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!--error 输出到滚动保存的文件, 触发保存日志文件的条件是每小时第一次的日志事件。-->
+        <RollingFile name="errorLog" fileName="${LOG_HOME}/error/${LOG_NAME}-error.log"
+                     filePattern="${LOG_HOME}/error/${LOG_NAME}-error-%d{yyyy-MM-dd_HH}.log.gz">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${LOG_FILE_CHARSET}" pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="${LOG_FILE_SIZE}"/>
+            </Policies>
+            <!-- 最多备份30天以内的日志，此处为策略限制，Delete中可以按自己需要用正则表达式编写 -->
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_HOME}/error" maxDepth="1">
+                    <IfFileName glob="${LOG_NAME}-error-*.log.gz"/>
+                    <IfLastModified age="${LOG_MAX_DAY}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.springframework" level="INFO"/>
+        <Logger name="ch.qos.logback" level="INFO"/>
+        <Logger name="org.mybatis.spring.mapper.MapperScannerConfigurer" level="INFO"/>
+        <Logger name="org.mybatis.spring.mapper.ClassPathMapperScanner" level="ERROR"/>
+        <Logger name="org.mybatis.spring.SqlSessionFactoryBean" level="INFO"/>
+        <Logger name="org.apache.commons.httpclient.HttpClient" level="INFO"/>
+        <Logger name="org.apache.commons.httpclient" level="INFO"/>
+        <Logger name="org.apache.commons.httpclient.HttpConnection" level="INFO"/>
+        <Logger name="org.apache.http.client.protocol" level="INFO"/>
+        <Logger name="org.apache.ibatis.logging.LogFactory" level="INFO"/>
+        <Logger name="org.apache.commons.beanutils" level="INFO"/>
+        <Logger name="org.apache.http.headers" level="INFO"/>
+        <Logger name="java.sql.ResultSet" level="INFO"/>
+        <!-- Spring-data-redis日志 -->
+        <Logger name="org.springframework.data.redis" level="INFO"/>
+        <Logger name="io.lettuce.core" level="INFO"/>
+        <!--zookeeper-->
+        <Logger name="org.apache.zookeeper" level="ERROR"/>
+        <Logger name="org.I0Itec.zkclient" level="ERROR"/>
+        <Logger name="org.springframework.context.support.PostProcessorRegistrationDelegate$BeanPostProcessorChecker" level="ERROR"/>
+
+        <!-- swagger -->
+        <Logger name="springfox.documentation" level="ERROR"/>
+        <!-- apache -->
+        <Logger name="org.apache.http.impl" level="INFO"/>
+        <Logger name="org.apache.http.wire" level="INFO"/>
+
+        <Root level="${LOG_LEVEL}">
+            <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="debugLog"/>
+            <AppenderRef ref="infoLog"/>
+            <AppenderRef ref="errorLog"/>
+        </Root>
+    </Loggers>
+</Configuration>

@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  pre:
+    build: .
+    image: pre
+    container_name: pre-container
+    restart: always
+    ports: 
+      - 9001:9001
+    volumes:
+      - /export/data/logs/:/export/data/logs/
+    environment:
+      TZ: Asia/Shanghai
+
+networks:
+  default:
+    name: d-network
