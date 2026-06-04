@@ -3,7 +3,6 @@ package com.bazzi.pre.service.impl;
 import com.bazzi.pre.model.User;
 import com.bazzi.pre.service.AsyncService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
