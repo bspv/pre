@@ -105,7 +105,7 @@ public final class DigestUtil {
      */
     public static byte[] encodeBase64(String base64String) {
         if (base64String == null)
-            return null;
+            return new byte[0];
         return Base64.encodeBase64(StringUtils.getBytesUtf8(base64String));
     }
 
@@ -129,7 +129,7 @@ public final class DigestUtil {
      */
     public static byte[] encodeBase64(byte[] base64) {
         if (base64 == null)
-            return null;
+            return new byte[0];
         return Base64.encodeBase64(base64);
     }
 
@@ -153,7 +153,7 @@ public final class DigestUtil {
      */
     public static byte[] decodeBase64(String base64String) {
         if (base64String == null)
-            return null;
+            return new byte[0];
         return Base64.decodeBase64(base64String);
     }
 
@@ -177,7 +177,7 @@ public final class DigestUtil {
      */
     public static byte[] decodeBase64(byte[] base64) {
         if (base64 == null)
-            return null;
+            return new byte[0];
         return Base64.decodeBase64(base64);
     }
 

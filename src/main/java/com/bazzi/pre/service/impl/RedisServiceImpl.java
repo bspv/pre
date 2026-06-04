@@ -22,7 +22,8 @@ public class RedisServiceImpl implements RedisService {
     private RedisTemplate<String, Object> redisTemplate;
 
     public long ttl(String key) {
-        return redisTemplate.getExpire(key, TimeUnit.SECONDS);
+        Long expire = redisTemplate.getExpire(key, TimeUnit.SECONDS);
+        return expire == null ? -2L : expire;
     }
 
     public Set<String> keys(String keyPattern) {
@@ -30,7 +31,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     public boolean exists(String key) {
-        return redisTemplate.hasKey(key);
+        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 
     public void delete(String key) {
@@ -38,11 +39,11 @@ public class RedisServiceImpl implements RedisService {
     }
 
     public boolean expire(String key, int seconds) {
-        return redisTemplate.expire(key, seconds, TimeUnit.SECONDS);
+        return Boolean.TRUE.equals(redisTemplate.expire(key, seconds, TimeUnit.SECONDS));
     }
 
     public boolean expireAt(String key, long timestamp) {
-        return redisTemplate.expireAt(key, new Date(timestamp));
+        return Boolean.TRUE.equals(redisTemplate.expireAt(key, new Date(timestamp)));
     }
 
 
@@ -51,7 +52,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     public boolean persist(String key) {
-        return redisTemplate.persist(key);
+        return Boolean.TRUE.equals(redisTemplate.persist(key));
     }
 
     public <T> void set(String key, T val) {
@@ -63,8 +64,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     public <T> boolean setNx(String key, T val) {
-        Boolean b = redisTemplate.opsForValue().setIfAbsent(key, val);
-        return b != null ? b : false;
+        return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, val));
     }
 
     public <T> void setEx(String key, T val, int expireTime) {
@@ -145,8 +145,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     public boolean sIsMember(String key, Object obj) {
-        Boolean b = redisTemplate.opsForSet().isMember(key, obj);
-        return b != null ? b : false;
+        return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(key, obj));
     }
 
     public Object sPop(String key) {
@@ -220,6 +219,8 @@ public class RedisServiceImpl implements RedisService {
                 Thread.sleep(DEFAULT_SLEEP_TIME);
             } catch (InterruptedException e) {
                 log.error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
+                return false;
             }
         }
         return true;
@@ -242,6 +243,8 @@ public class RedisServiceImpl implements RedisService {
                 current += sleepTime;
             } catch (InterruptedException e) {
                 log.error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
+                return false;
             }
         }
         return true;
@@ -256,7 +259,7 @@ public class RedisServiceImpl implements RedisService {
         RedisScript<Long> redisScript = new DefaultRedisScript<>(lua, Long.class);
         Long result = redisTemplate.execute(redisScript, new StringRedisSerializer(),
                 new Jackson2JsonRedisSerializer<>(Long.class), Collections.singletonList(key), value);
-        return 1 == result.intValue();
+        return result != null && result.intValue() == 1;
     }
 
 }

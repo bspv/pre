@@ -47,3 +47,10 @@ spring:
 logging:
   level:
     root: debug
+
+definition:
+  cors:
+    # 允许跨域访问的源，测试环境请替换为实际前端域名
+    allowed-origins:
+      - https://test.bazzi.com
+      - https://*.bazzi.com

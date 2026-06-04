@@ -11,7 +11,7 @@ public class TestPermissions {
             int rp = permission & read;
             int wp = permission & write;
             int ep = permission & execute;
-            System.out.printf("%d === Read: %b Execute: %b Write: %b\n", permission, rp != 0, ep != 0, wp != 0);
+            System.out.printf("%d === Read: %b Execute: %b Write: %b%n", permission, rp != 0, ep != 0, wp != 0);
         }
 
     }

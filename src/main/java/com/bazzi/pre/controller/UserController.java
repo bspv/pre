@@ -5,7 +5,6 @@ import com.bazzi.core.generic.TipsCodeEnum;
 import com.bazzi.pre.bean.UserBean;
 import com.bazzi.pre.model.User;
 import com.bazzi.pre.service.UserService;
-//import io.swagger.annotations.Api;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

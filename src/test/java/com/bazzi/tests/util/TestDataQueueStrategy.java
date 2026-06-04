@@ -16,10 +16,6 @@ public class TestDataQueueStrategy {
         map.put("DataQueue-3", 3);
         map.put("DataQueue-4", 4);
         map.put("DataQueue-5", 5);
-//        map.put("DataQueue-6", 6);
-//        map.put("DataQueue-7", 7);
-//        map.put("DataQueue-8", 8);
-//        map.put("DataQueue-9", 9);
 
         DataQueueStrategy.init(map.keySet());
 

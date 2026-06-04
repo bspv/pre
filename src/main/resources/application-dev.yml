@@ -51,3 +51,12 @@ spring:
 logging:
   level:
     root: debug
+
+definition:
+  cors:
+    # 允许跨域访问的源，支持精确地址和通配符（如 https://*.bazzi.com）
+    allowed-origins:
+      - http://localhost:5173
+      - http://127.0.0.1:5173
+      - http://localhost:9001
+      - http://127.0.0.1:9001

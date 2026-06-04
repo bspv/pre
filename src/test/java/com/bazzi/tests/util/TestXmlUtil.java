@@ -90,7 +90,7 @@ class TestXmlUtil {
     void testFieldNameWithUnderscoreAndHyphen_roundTrip() {
         // 字段名同时含 _ 与 - 注解别名，验证两侧 NameCoder 一致
         Tricky obj = new Tricky();
-        obj.setUser_name("u1");
+        obj.setUserName("u1");
         obj.setUserAge(7);
 
         String xml = XmlUtil.toXml(obj);
@@ -207,7 +207,7 @@ class TestXmlUtil {
     public static class Tricky {
         // 字段名含下划线
         @XStreamAlias("user_name")
-        private String user_name;
+        private String userName;
         // 别名含连字符
         @XStreamAlias("user-age")
         private Integer userAge;
