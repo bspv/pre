@@ -29,6 +29,7 @@ public class CustomInterceptor implements HandlerInterceptor {
                 request.getRequestURI(), request.getMethod(), JsonUtil.toJsonString(ThreadLocalUtil.getParameter()),
                 JsonUtil.toJsonString(ThreadLocalUtil.getResult()),
                 System.currentTimeMillis() - timeThreadLocal.get());
+        timeThreadLocal.remove();
         ThreadLocalUtil.clearThreadLocal();
     }
 

@@ -27,9 +27,6 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public final class CsvUtil {
-    private static final char DEFAULT_QUOTE = ICSVParser.DEFAULT_QUOTE_CHARACTER;
-    private static final char DEFAULT_ESCAPE = ICSVParser.DEFAULT_ESCAPE_CHARACTER;
-
     private static final int MIN_CHAR_BUFFER_SIZE = 8 * 1024;
 
     private static final String MSG_FILE_PATH_REQUIRED = "文件路径不能为空";
@@ -111,7 +108,9 @@ public final class CsvUtil {
     private static <T> List<T> baseReadAsObject(BufferReaderSupplier supplier, Class<T> clazz, CsvConfig conf) {
         try (BufferedReader bufferedReader = supplier.get()) {
             CsvToBean<T> csvToBean = buildCsvToBean(bufferedReader, clazz, conf);
-            return csvToBean.parse();
+            List<T> list = csvToBean.parse();
+            logSkippedRows(conf, csvToBean);
+            return list;
         } catch (Exception e) {
             throw wrapException(e, "读取CSV为对象失败");
         }
@@ -212,6 +211,7 @@ public final class CsvUtil {
             if (!batchList.isEmpty()) {
                 consumer.accept(batchList);
             }
+            logSkippedRows(conf, csvToBean);
         } catch (Exception e) {
             throw wrapException(e, "批量读取CSV为对象失败");
         }
@@ -452,8 +452,8 @@ public final class CsvUtil {
     private static CSVReader buildCsvReader(BufferedReader bufferedReader, CsvConfig conf) {
         CSVParser csvParser = new CSVParserBuilder()
                 .withSeparator(conf.getSeparator())
-                .withQuoteChar(DEFAULT_QUOTE)
-                .withEscapeChar(DEFAULT_ESCAPE)
+                .withQuoteChar(conf.getQuoteChar())
+                .withEscapeChar(conf.getEscapeChar())
                 .build();
 
         return new CSVReaderBuilder(bufferedReader)
@@ -473,9 +473,10 @@ public final class CsvUtil {
                 .withType(clazz)
                 .withMappingStrategy(mappingStrategy)
                 .withSeparator(conf.getSeparator())
-                .withQuoteChar(DEFAULT_QUOTE)
-                .withEscapeChar(DEFAULT_ESCAPE)
+                .withQuoteChar(conf.getQuoteChar())
+                .withEscapeChar(conf.getEscapeChar())
                 .withIgnoreLeadingWhiteSpace(true)
+                .withThrowExceptions(conf.isThrowExceptions())
                 .withSkipLines(skipLines)
                 .build();
     }
@@ -498,6 +499,19 @@ public final class CsvUtil {
         }
         strategy.setType(clazz);
         return strategy;
+    }
+
+    /**
+     * 当配置为不抛异常(throwExceptions=false)时，统计并告警被跳过的错误行数量。
+     */
+    private static <T> void logSkippedRows(CsvConfig conf, CsvToBean<T> csvToBean) {
+        if (conf.isThrowExceptions()) {
+            return;
+        }
+        int skipped = csvToBean.getCapturedExceptions().size();
+        if (skipped > 0) {
+            log.warn("读取CSV为对象：跳过 {} 行解析异常的数据（如字段数与表头不一致）", skipped);
+        }
     }
 
     private static BufferedReader buildBufferReader(String filePath, CsvConfig conf) throws IOException {
