@@ -1,10 +1,8 @@
-version: '3.8'
-
 services:
   pre:
     build: .
     image: pre
-    container_name: pre-container
+    container_name: pre-app
     restart: always
     ports: 
       - 9001:9001
@@ -12,7 +10,3 @@ services:
       - /export/data/logs/:/export/data/logs/
     environment:
       TZ: Asia/Shanghai
-
-networks:
-  default:
-    name: d-network

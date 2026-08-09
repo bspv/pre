@@ -1,11 +1,13 @@
 package com.bazzi.pre.config;
 
+import com.bazzi.core.util.SpringContextUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import org.hibernate.validator.HibernateValidator;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +25,12 @@ import java.text.SimpleDateFormat;
 @Configuration
 public class OtherConfig {
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+    // SpringContextUtil 不在组件扫描范围内，此处显式注册
+    @Bean
+    public SpringContextUtil springContextUtil() {
+        return new SpringContextUtil();
+    }
 
     @Bean
     public MappingJackson2HttpMessageConverter customJackson2HttpMessageConverter() {
@@ -66,8 +74,15 @@ public class OtherConfig {
         // 设置任何字段可见
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
 
-        PolymorphicTypeValidator validator = objectMapper.getPolymorphicTypeValidator();
-        objectMapper.activateDefaultTyping(validator,ObjectMapper.DefaultTyping.NON_FINAL);
+        // 多态类型白名单：只允许反序列化本项目类型和 JDK 常用容器/时间类型，
+        // 默认的 LaissezFaire 校验器不做任何限制，能写入 Redis 的一方可注入任意 gadget 类触发反序列化攻击
+        PolymorphicTypeValidator validator = BasicPolymorphicTypeValidator.builder()
+                .allowIfSubType("com.bazzi.")
+                .allowIfSubType("java.util.")
+                .allowIfSubType("java.time.")
+                .allowIfSubType("java.math.")
+                .build();
+        objectMapper.activateDefaultTyping(validator, ObjectMapper.DefaultTyping.NON_FINAL);
 
         objectMapper.setDateFormat(new SimpleDateFormat(DATE_FORMAT));
         // 属性为NULL不序列化

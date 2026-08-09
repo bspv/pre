@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/pre?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&roundRobinLoadBalance=true&failOverReadOnly=false&allowMultiQueries=true&rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost:3306/pre?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&roundRobinLoadBalance=true&failOverReadOnly=false&allowMultiQueries=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
     username: root
     password: 12345678
     type: com.zaxxer.hikari.HikariDataSource
@@ -46,6 +46,9 @@ spring:
 logging:
   level:
     root: debug
+    # test 为部署环境且日志落盘，Spring 自身日志压到 info，避免 debug 刷满文件；
+    # 需要排查启动失败、Bean 定义冲突时临时改成 debug
+    org.springframework: info
 
 definition:
   cors:

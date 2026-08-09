@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/pre?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&roundRobinLoadBalance=true&failOverReadOnly=false&allowMultiQueries=true&rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost:3306/pre?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&roundRobinLoadBalance=true&failOverReadOnly=false&allowMultiQueries=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
     username: root
     password: 12345678
     type: com.zaxxer.hikari.HikariDataSource

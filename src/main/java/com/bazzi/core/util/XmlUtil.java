@@ -77,9 +77,13 @@ public final class XmlUtil {
         if (xml == null || xml.isEmpty() || clazz == null) {
             return null;
         }
-        registerType(DESERIALIZE_XSTREAM, DESERIALIZE_REGISTERED, clazz);
-        // 显式放行调用方传入的目标类型，避免被白名单拦截
-        DESERIALIZE_XSTREAM.allowTypes(new Class[]{clazz});
+        // 显式放行调用方传入的目标类型，避免被白名单拦截；
+        // allowTypes/processAnnotations 会修改共享实例，只在该类型首次注册时执行一次，
+        // 避免每次调用都并发修改共享 XStream 配置
+        if (DESERIALIZE_REGISTERED.add(clazz)) {
+            DESERIALIZE_XSTREAM.allowTypes(new Class[]{clazz});
+            DESERIALIZE_XSTREAM.processAnnotations(clazz);
+        }
         Object obj = DESERIALIZE_XSTREAM.fromXML(xml);
         return clazz.cast(obj);
     }

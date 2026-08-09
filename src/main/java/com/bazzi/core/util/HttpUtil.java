@@ -15,15 +15,18 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * HTTP请求，支持GET、POST，以及把请求参数放在requestBody里
@@ -38,11 +41,31 @@ public final class HttpUtil {
     private static final int PUT = 2;
     private static final int DELETE = 3;
 
+    private static final int MAX_TOTAL = 200;// 连接池最大连接数
+    private static final int MAX_PER_ROUTE = 50;// 每个路由(目标host)的最大连接数
+    private static final int VALIDATE_AFTER_INACTIVITY = 2000;// 空闲超过该毫秒数的连接，复用前先校验可用性
+    private static final long IDLE_TIMEOUT_SECONDS = 30;// 定期清理空闲连接的阈值(秒)
+
     private static final RequestConfig DEFAULT_REQUEST_CONFIG = RequestConfig.custom()
             .setConnectTimeout(15000)//连接超时时间，毫秒
             .setConnectionRequestTimeout(5000)//从connect Manager(连接池)获取Connection 超时时间，毫秒
             .setSocketTimeout(60000)//请求获取数据的超时时间(即响应时间)，毫秒
             .build();
+
+    // 全局共享的连接池管理器与HttpClient，避免每次请求都新建/销毁客户端，复用连接、提升吞吐并防止句柄耗尽
+    private static final PoolingHttpClientConnectionManager CONNECTION_MANAGER = buildConnectionManager();
+    private static final CloseableHttpClient HTTP_CLIENT = buildHttpClient();
+
+    static {
+        // JVM退出时优雅释放连接池资源
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                HTTP_CLIENT.close();
+            } catch (IOException e) {
+                log.error("关闭HttpClient失败: {}", e.getMessage());
+            }
+        }, "httpclient-shutdown"));
+    }
 
     /**
      * 发送GET请求
@@ -194,41 +217,10 @@ public final class HttpUtil {
             throw new IllegalArgumentException("Property 'url' is required");
         if (param == null || param.isEmpty())
             throw new IllegalArgumentException("Property 'param' is required");
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        CloseableHttpResponse response = null;
-        try {
-            HttpPost postReq = new HttpPost(url);
-            postReq.setConfig(DEFAULT_REQUEST_CONFIG);
-            headerMap = headerMap == null ? new HashMap<>() : headerMap;
-            for (Map.Entry<String, String> entry : headerMap.entrySet()) {
-                postReq.addHeader(entry.getKey(), entry.getValue());
-            }
-            postReq.setEntity(new ByteArrayEntity(param.getBytes(StandardCharsets.UTF_8)));
-            response = httpClient.execute(postReq);
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode != HttpStatus.SC_OK) {
-                log.info("StatusCode:{},ReasonPhrase:{}", statusCode, response.getStatusLine().getReasonPhrase());
-                return Result.failure("-1", String.format("异常的响应状态: %s", statusCode));
-            }
-            HttpEntity httpEntity = response.getEntity();
-            String data = httpEntity == null ? null : EntityUtils.toString(httpEntity, StandardCharsets.UTF_8);
-            return Result.success(data);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw new BusinessException("-1", e.getMessage());
-        } finally {
-            if (response != null)
-                try {
-                    response.close();
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                }
-            try {
-                httpClient.close();
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        }
+        HttpPost postReq = new HttpPost(url);
+        addHeaderForRequest(postReq, headerMap);
+        postReq.setEntity(new ByteArrayEntity(param.getBytes(StandardCharsets.UTF_8)));
+        return execute(postReq);
     }
 
     /**
@@ -266,16 +258,27 @@ public final class HttpUtil {
      * @return 请求结果
      */
     private static Result<String> baseSend(String url, Map<String, String> paramMap, Map<String, String> headerMap, int type) {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        CloseableHttpResponse response = null;
         try {
             HttpRequestBase requestBase = buildHttpRequestBase(url, paramMap, type);
-            requestBase.setConfig(DEFAULT_REQUEST_CONFIG);
-
             addHeaderForRequest(requestBase, headerMap);
+            return execute(requestBase);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new BusinessException("-1", e.getMessage());
+        }
+    }
 
-            response = httpClient.execute(requestBase);
-
+    /**
+     * 使用全局共享连接池的HttpClient执行请求，并把响应解析为Result。
+     * 请求完成后仅关闭response(把连接归还连接池)，不关闭共享的HttpClient。
+     *
+     * @param requestBase 请求
+     * @return 请求结果
+     */
+    private static Result<String> execute(HttpRequestBase requestBase) {
+        try (CloseableHttpResponse response = HTTP_CLIENT.execute(requestBase)) {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != HttpStatus.SC_OK) {
                 log.info("StatusCode:{},ReasonPhrase:{}", statusCode, response.getStatusLine().getReasonPhrase());
@@ -287,19 +290,6 @@ public final class HttpUtil {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw new BusinessException("-1", e.getMessage());
-        } finally {
-            if (response != null)
-                try {
-                    response.close();
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                }
-            if (httpClient != null)
-                try {
-                    httpClient.close();
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                }
         }
     }
 
@@ -380,6 +370,35 @@ public final class HttpUtil {
         if (t == null)
             return map;
         return JsonUtil.parseMap(JsonUtil.toJsonString(t), String.class, String.class);
+    }
+
+    /**
+     * 构建全局共享的连接池管理器，设置连接池最大连接数、单路由最大连接数，
+     * 以及空闲连接复用前的可用性校验时间，避免复用到已被服务端关闭的连接
+     *
+     * @return 连接池管理器
+     */
+    private static PoolingHttpClientConnectionManager buildConnectionManager() {
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        cm.setMaxTotal(MAX_TOTAL);
+        cm.setDefaultMaxPerRoute(MAX_PER_ROUTE);
+        cm.setValidateAfterInactivity(VALIDATE_AFTER_INACTIVITY);
+        return cm;
+    }
+
+    /**
+     * 构建全局共享的HttpClient，绑定连接池管理器与默认超时配置，
+     * 并开启空闲连接、过期连接的定期清理
+     *
+     * @return HttpClient实例
+     */
+    private static CloseableHttpClient buildHttpClient() {
+        return HttpClients.custom()
+                .setConnectionManager(CONNECTION_MANAGER)
+                .setDefaultRequestConfig(DEFAULT_REQUEST_CONFIG)
+                .evictIdleConnections(IDLE_TIMEOUT_SECONDS, TimeUnit.SECONDS)//清理空闲连接
+                .evictExpiredConnections()//清理过期连接
+                .build();
     }
 
 }

@@ -75,7 +75,6 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="org.springframework" level="INFO"/>
         <Logger name="ch.qos.logback" level="INFO"/>
         <Logger name="org.mybatis.spring.mapper.MapperScannerConfigurer" level="INFO"/>
         <Logger name="org.mybatis.spring.mapper.ClassPathMapperScanner" level="ERROR"/>

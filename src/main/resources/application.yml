@@ -3,15 +3,11 @@ spring:
     name: pre
   profiles:
     active: '@activeProfile@'
-  session:
-    store-type: redis
   jmx:
     enabled: false
   cache:
     redis:
      key-prefix: k_pre
-  main:
-    allow-bean-definition-overriding: true
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
